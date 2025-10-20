@@ -10,8 +10,7 @@ const supportTicketSchema = new mongoose.Schema({
   },
   ticketNumber: {
     type: String,
-    required: true,
-    unique: true
+    required: true
   },
   subject: {
     type: String,
@@ -71,7 +70,7 @@ const supportTicketSchema = new mongoose.Schema({
 
 supportTicketSchema.index({ tenantId: 1, status: 1 });
 supportTicketSchema.index({ assignedTo: 1, status: 1 });
-supportTicketSchema.index({ ticketNumber: 1 });
+supportTicketSchema.index({ ticketNumber: 1 }, { unique: true });
 
 supportTicketSchema.pre('save', async function(next) {
   if (!this.ticketNumber) {

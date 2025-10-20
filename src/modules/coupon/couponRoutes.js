@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const couponController = require('./couponController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const couponValidation = require('./couponValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Create coupon (admin, manager)
 router.post(
   '/',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(couponValidation.createCoupon),
   couponController.createCoupon
 );
@@ -22,7 +22,7 @@ router.post(
 // Get all coupons (admin, manager, cashier, captain)
 router.get(
   '/',
-  rbacMiddleware(['admin', 'manager', 'cashier', 'captain']),
+  requirePermission('coupons.read'),
   validate(couponValidation.getCoupons),
   couponController.getCoupons
 );
@@ -44,7 +44,7 @@ router.get(
 // Update coupon (admin, manager)
 router.put(
   '/:id',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(couponValidation.updateCoupon),
   couponController.updateCoupon
 );
@@ -52,7 +52,7 @@ router.put(
 // Delete coupon (admin, manager)
 router.delete(
   '/:id',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(couponValidation.deleteCoupon),
   couponController.deleteCoupon
 );
@@ -60,7 +60,7 @@ router.delete(
 // Get coupon usage (admin, manager)
 router.get(
   '/:id/usage',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(couponValidation.getCouponUsage),
   couponController.getCouponUsage
 );

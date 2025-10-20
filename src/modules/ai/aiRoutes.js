@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const aiController = require('./aiController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const aiValidation = require('./aiValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Generate dish profile (admin, manager)
 router.post(
   '/generate-dish-profile',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('ai.use'),
   validate(aiValidation.generateDishProfile),
   aiController.generateDishProfile
 );
@@ -22,7 +22,7 @@ router.post(
 // Analyze nutrition (admin, manager)
 router.post(
   '/analyze-nutrition',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('ai.use'),
   validate(aiValidation.analyzeNutrition),
   aiController.analyzeNutrition
 );

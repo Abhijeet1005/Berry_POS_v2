@@ -20,10 +20,7 @@ const connectDB = async () => {
       ? process.env.MONGODB_TEST_URI 
       : process.env.MONGODB_URI;
 
-    await mongoose.connect(mongoURI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true
-    });
+    await mongoose.connect(mongoURI);
 
     logger.info('MongoDB connected successfully', {
       host: mongoose.connection.host,
@@ -40,8 +37,14 @@ const connectDB = async () => {
  */
 const connectRedis = async () => {
   try {
-    await redis.ping();
-    logger.info('Redis connected successfully');
+    if (redis && typeof redis.ping === 'function') {
+      await redis.ping();
+      logger.info('Redis connected successfully');
+    } else if (redis && redis.isOpen) {
+      logger.info('Redis connected successfully');
+    } else {
+      throw new Error('Redis client not properly initialized');
+    }
   } catch (error) {
     logger.error('Redis connection error:', error);
     // Don't exit - Redis is optional for some features

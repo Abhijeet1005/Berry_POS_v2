@@ -2,12 +2,12 @@ const express = require('express');
 const router = express.Router();
 const customerController = require('./customerController');
 const { customerAuthMiddleware } = require('../../middleware/customerAuthMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const customerValidation = require('./customerValidation');
 
 // Apply tenant middleware to all routes
-router.use(tenantMiddleware);
+router.use(injectTenantContext);
 
 // Auth routes (public)
 router.post(

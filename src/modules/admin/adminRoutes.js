@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const adminController = require('./adminController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 
 // Apply auth middleware to all routes
-router.use(authMiddleware);
+router.use(authenticate);
 
 // All admin routes require admin role
-router.use(rbacMiddleware(['admin']));
+router.use(requirePermission('admin.access'));
 
 // Tenant management
 router.get('/tenants', adminController.getAllTenants);

@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const valetController = require('./valetController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const valetValidation = require('./valetValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Create valet request (all authenticated users)
 router.post(
@@ -21,7 +21,7 @@ router.post(
 // Get active valet requests (admin, manager, captain)
 router.get(
   '/requests',
-  rbacMiddleware(['admin', 'manager', 'captain']),
+  requirePermission('admin.access'),
   validate(valetValidation.getActiveRequests),
   valetController.getActiveRequests
 );
@@ -29,7 +29,7 @@ router.get(
 // Get valet performance (admin, manager)
 router.get(
   '/performance',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(valetValidation.getValetPerformance),
   valetController.getValetPerformance
 );
@@ -51,7 +51,7 @@ router.get(
 // Update valet status (admin, manager, captain)
 router.patch(
   '/requests/:id/status',
-  rbacMiddleware(['admin', 'manager', 'captain']),
+  requirePermission('admin.access'),
   validate(valetValidation.updateValetStatus),
   valetController.updateValetStatus
 );

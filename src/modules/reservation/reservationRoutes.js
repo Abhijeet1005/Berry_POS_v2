@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const reservationController = require('./reservationController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const reservationValidation = require('./reservationValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Create reservation (all authenticated users)
 router.post(
@@ -21,7 +21,7 @@ router.post(
 // Get all reservations (admin, manager, captain)
 router.get(
   '/',
-  rbacMiddleware(['admin', 'manager', 'captain']),
+  requirePermission('admin.access'),
   validate(reservationValidation.getReservations),
   reservationController.getReservations
 );

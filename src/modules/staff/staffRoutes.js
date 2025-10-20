@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const staffController = require('./staffController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const staffValidation = require('./staffValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Create staff member (admin only)
 router.post(
   '/',
-  rbacMiddleware(['admin']),
+  requirePermission('staff.create'),
   validate(staffValidation.createStaff),
   staffController.createStaff
 );
@@ -22,7 +22,7 @@ router.post(
 // Get all staff (admin, manager)
 router.get(
   '/',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('staff.read'),
   validate(staffValidation.getStaff),
   staffController.getStaff
 );
@@ -30,7 +30,7 @@ router.get(
 // Get staff by outlet (admin, manager)
 router.get(
   '/outlet/:outletId',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('staff.read'),
   validate(staffValidation.getStaffByOutlet),
   staffController.getStaffByOutlet
 );
@@ -38,7 +38,7 @@ router.get(
 // Get staff by ID (admin, manager)
 router.get(
   '/:id',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('staff.read'),
   validate(staffValidation.getStaffById),
   staffController.getStaffMember
 );
@@ -46,7 +46,7 @@ router.get(
 // Update staff (admin only)
 router.put(
   '/:id',
-  rbacMiddleware(['admin']),
+  requirePermission('staff.update'),
   validate(staffValidation.updateStaff),
   staffController.updateStaff
 );
@@ -54,7 +54,7 @@ router.put(
 // Delete staff (admin only)
 router.delete(
   '/:id',
-  rbacMiddleware(['admin']),
+  requirePermission('staff.delete'),
   validate(staffValidation.deleteStaff),
   staffController.deleteStaff
 );
@@ -62,7 +62,7 @@ router.delete(
 // Get staff performance (admin, manager)
 router.get(
   '/:id/performance',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('staff.read'),
   validate(staffValidation.getStaffPerformance),
   staffController.getStaffPerformance
 );

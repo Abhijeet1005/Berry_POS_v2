@@ -1,18 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const analyticsController = require('./analyticsController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const analyticsValidation = require('./analyticsValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // All analytics endpoints require admin or manager role
-router.use(rbacMiddleware(['admin', 'manager']));
+router.use(requirePermission('admin.access'));
 
 // Get sales analytics
 router.get(

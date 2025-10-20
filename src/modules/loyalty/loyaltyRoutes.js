@@ -1,15 +1,15 @@
 const express = require('express');
 const router = express.Router();
 const loyaltyController = require('./loyaltyController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const loyaltyValidation = require('./loyaltyValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Get customer loyalty balance (all authenticated users)
 router.get(
@@ -21,7 +21,7 @@ router.get(
 // Earn loyalty points (admin, manager, cashier, captain)
 router.post(
   '/earn',
-  rbacMiddleware(['admin', 'manager', 'cashier', 'captain']),
+  requirePermission('loyalty.manage'),
   validate(loyaltyValidation.earnPoints),
   loyaltyController.earnPoints
 );
@@ -29,7 +29,7 @@ router.post(
 // Redeem loyalty points (admin, manager, cashier, captain)
 router.post(
   '/redeem',
-  rbacMiddleware(['admin', 'manager', 'cashier', 'captain']),
+  requirePermission('loyalty.manage'),
   validate(loyaltyValidation.redeemPoints),
   loyaltyController.redeemPoints
 );
@@ -44,7 +44,7 @@ router.get(
 // Update loyalty rules (admin, manager)
 router.put(
   '/rules/:outletId',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('loyalty.configure'),
   validate(loyaltyValidation.updateLoyaltyRules),
   loyaltyController.updateLoyaltyRules
 );

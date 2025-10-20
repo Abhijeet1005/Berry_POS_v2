@@ -1,20 +1,20 @@
 const express = require('express');
 const router = express.Router();
 const notificationController = require('./notificationController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
-const { rbacMiddleware } = require('../../middleware/rbacMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const notificationValidation = require('./notificationValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Send notification (admin, manager, captain)
 router.post(
   '/send',
-  rbacMiddleware(['admin', 'manager', 'captain']),
+  requirePermission('admin.access'),
   validate(notificationValidation.sendNotification),
   notificationController.sendNotification
 );
@@ -36,35 +36,35 @@ router.get(
 // Template management (admin, manager)
 router.post(
   '/templates',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(notificationValidation.createTemplate),
   notificationController.createTemplate
 );
 
 router.get(
   '/templates',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(notificationValidation.getTemplates),
   notificationController.getTemplates
 );
 
 router.get(
   '/templates/:id',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(notificationValidation.getTemplateById),
   notificationController.getTemplateById
 );
 
 router.put(
   '/templates/:id',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(notificationValidation.updateTemplate),
   notificationController.updateTemplate
 );
 
 router.delete(
   '/templates/:id',
-  rbacMiddleware(['admin', 'manager']),
+  requirePermission('admin.access'),
   validate(notificationValidation.deleteTemplate),
   notificationController.deleteTemplate
 );

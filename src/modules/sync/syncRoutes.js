@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const syncController = require('./syncController');
-const { authMiddleware } = require('../../middleware/authMiddleware');
-const { tenantMiddleware } = require('../../middleware/tenantMiddleware');
+const { authenticate } = require('../../middleware/authMiddleware');
+const { injectTenantContext } = require('../../middleware/tenantMiddleware');
 const { validate } = require('../../middleware/validationMiddleware');
 const syncValidation = require('./syncValidation');
 
 // Apply auth and tenant middleware to all routes
-router.use(authMiddleware);
-router.use(tenantMiddleware);
+router.use(authenticate);
+router.use(injectTenantContext);
 
 // Push sync (all authenticated users)
 router.post(
