@@ -372,6 +372,4 @@ pm2 logs
 
 ISC
 
-## Support
-
 For support, email support@berryblocks.com or create an issue in the repository.
