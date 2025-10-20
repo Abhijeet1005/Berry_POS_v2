@@ -5,6 +5,7 @@ const { validate, validateObjectId } = require('../../middleware/validationMiddl
 const { authenticate } = require('../../middleware/authMiddleware');
 const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { injectTenantContext } = require('../../middleware/tenantMiddleware');
+const { cacheMiddleware, invalidateCacheMiddleware } = require('../../middleware/cacheMiddleware');
 const {
   createDishSchema,
   updateDishSchema,
@@ -40,6 +41,7 @@ router.post(
 router.get(
   '/dishes',
   requirePermission('dishes.read'),
+  cacheMiddleware({ ttl: 300 }), // Cache for 5 minutes
   menuController.getDishes
 );
 
@@ -52,6 +54,7 @@ router.get(
   '/dishes/search',
   requirePermission('dishes.read'),
   validate(searchDishesSchema, 'query'),
+  cacheMiddleware({ ttl: 300 }), // Cache for 5 minutes
   menuController.searchDishes
 );
 
@@ -64,6 +67,7 @@ router.get(
   '/dishes/:id',
   validateObjectId('id'),
   requirePermission('dishes.read'),
+  cacheMiddleware({ ttl: 600 }), // Cache for 10 minutes
   menuController.getDish
 );
 
@@ -77,6 +81,9 @@ router.put(
   validateObjectId('id'),
   requirePermission('dishes.update'),
   validate(updateDishSchema),
+  invalidateCacheMiddleware({
+    patterns: [(req) => `*:dishes:*:tenant:${req.tenantId}:*`]
+  }),
   menuController.updateDish
 );
 
@@ -127,6 +134,7 @@ router.post(
 router.get(
   '/categories',
   requirePermission('categories.read'),
+  cacheMiddleware({ ttl: 600 }), // Cache for 10 minutes
   menuController.getCategories
 );
 

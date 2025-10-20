@@ -4,6 +4,7 @@ const tenantController = require('./tenantController');
 const { validate, validateObjectId } = require('../../middleware/validationMiddleware');
 const { authenticate } = require('../../middleware/authMiddleware');
 const { requireAdmin } = require('../../middleware/rbacMiddleware');
+const { cacheMiddleware, invalidateCacheMiddleware } = require('../../middleware/cacheMiddleware');
 const {
   createTenantSchema,
   updateTenantSchema,
@@ -27,14 +28,14 @@ router.post('/', validate(createTenantSchema), tenantController.createTenant);
  * @desc    Get tenant by ID
  * @access  Private (Admin only)
  */
-router.get('/:id', validateObjectId('id'), tenantController.getTenant);
+router.get('/:id', validateObjectId('id'), cacheMiddleware({ ttl: 600 }), tenantController.getTenant);
 
 /**
  * @route   PUT /api/v1/tenants/:id
  * @desc    Update tenant
  * @access  Private (Admin only)
  */
-router.put('/:id', validateObjectId('id'), validate(updateTenantSchema), tenantController.updateTenant);
+router.put('/:id', validateObjectId('id'), validate(updateTenantSchema), invalidateCacheMiddleware({ patterns: [(req) => `*:tenant:${req.params.id}:*`] }), tenantController.updateTenant);
 
 /**
  * @route   DELETE /api/v1/tenants/:id
@@ -48,7 +49,7 @@ router.delete('/:id', validateObjectId('id'), tenantController.deleteTenant);
  * @desc    Get tenant hierarchy
  * @access  Private (Admin only)
  */
-router.get('/:id/hierarchy', validateObjectId('id'), tenantController.getTenantHierarchy);
+router.get('/:id/hierarchy', validateObjectId('id'), cacheMiddleware({ ttl: 600 }), tenantController.getTenantHierarchy);
 
 /**
  * @route   POST /api/v1/tenants/:id/outlets

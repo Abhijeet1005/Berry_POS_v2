@@ -1,77 +1,156 @@
+require('dotenv').config();
 const app = require('./app');
-const config = require('./config/environment');
-const { connectDB } = require('./config/database');
-const { connectRedis } = require('./config/redis');
+const mongoose = require('mongoose');
+const redis = require('./config/redis');
 const logger = require('./utils/logger');
 
+const PORT = process.env.PORT || 3000;
+const NODE_ENV = process.env.NODE_ENV || 'development';
+
+// Track server state
+let isShuttingDown = false;
 let server;
 
+/**
+ * Connect to MongoDB
+ */
+const connectDB = async () => {
+  try {
+    const mongoURI = NODE_ENV === 'test' 
+      ? process.env.MONGODB_TEST_URI 
+      : process.env.MONGODB_URI;
+
+    await mongoose.connect(mongoURI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true
+    });
+
+    logger.info('MongoDB connected successfully', {
+      host: mongoose.connection.host,
+      database: mongoose.connection.name
+    });
+  } catch (error) {
+    logger.error('MongoDB connection error:', error);
+    process.exit(1);
+  }
+};
+
+/**
+ * Connect to Redis
+ */
+const connectRedis = async () => {
+  try {
+    await redis.ping();
+    logger.info('Redis connected successfully');
+  } catch (error) {
+    logger.error('Redis connection error:', error);
+    // Don't exit - Redis is optional for some features
+    logger.warn('Continuing without Redis - some features may be limited');
+  }
+};
+
+/**
+ * Start the server
+ */
 const startServer = async () => {
   try {
-    // Connect to MongoDB
+    // Connect to databases
     await connectDB();
-    
-    // Connect to Redis
     await connectRedis();
-    
+
     // Start Express server
-    server = app.listen(config.port, () => {
-      logger.info(`Server running on port ${config.port} in ${config.env} mode`);
+    server = app.listen(PORT, () => {
+      logger.info(`Server started in ${NODE_ENV} mode`, {
+        port: PORT,
+        nodeVersion: process.version,
+        pid: process.pid
+      });
     });
-    
-    // Graceful shutdown
-    process.on('SIGTERM', gracefulShutdown);
-    process.on('SIGINT', gracefulShutdown);
-    
+
+    // Handle server errors
+    server.on('error', (error) => {
+      if (error.code === 'EADDRINUSE') {
+        logger.error(`Port ${PORT} is already in use`);
+      } else {
+        logger.error('Server error:', error);
+      }
+      process.exit(1);
+    });
+
   } catch (error) {
     logger.error('Failed to start server:', error);
     process.exit(1);
   }
 };
 
-const gracefulShutdown = async () => {
-  logger.info('Received shutdown signal, closing server gracefully...');
-  
+/**
+ * Graceful shutdown
+ */
+const gracefulShutdown = async (signal) => {
+  if (isShuttingDown) {
+    logger.warn('Shutdown already in progress');
+    return;
+  }
+
+  isShuttingDown = true;
+  logger.info(`${signal} received, starting graceful shutdown`);
+
+  // Stop accepting new connections
   if (server) {
     server.close(async () => {
       logger.info('HTTP server closed');
-      
+
       try {
-        const { disconnectDB } = require('./config/database');
-        const { disconnectRedis } = require('./config/redis');
-        
-        await disconnectDB();
-        await disconnectRedis();
-        
-        logger.info('All connections closed, exiting process');
+        // Close database connections
+        await mongoose.connection.close();
+        logger.info('MongoDB connection closed');
+
+        await redis.quit();
+        logger.info('Redis connection closed');
+
+        logger.info('Graceful shutdown completed');
         process.exit(0);
       } catch (error) {
         logger.error('Error during shutdown:', error);
         process.exit(1);
       }
     });
-    
-    // Force shutdown after 10 seconds
+
+    // Force shutdown after 30 seconds
     setTimeout(() => {
       logger.error('Forced shutdown after timeout');
       process.exit(1);
-    }, 10000);
+    }, 30000);
+  } else {
+    process.exit(0);
   }
 };
 
-// Handle uncaught exceptions
+/**
+ * Handle uncaught exceptions
+ */
 process.on('uncaughtException', (error) => {
   logger.error('Uncaught Exception:', error);
-  process.exit(1);
+  gracefulShutdown('UNCAUGHT_EXCEPTION');
 });
 
-// Handle unhandled promise rejections
+/**
+ * Handle unhandled promise rejections
+ */
 process.on('unhandledRejection', (reason, promise) => {
   logger.error('Unhandled Rejection at:', promise, 'reason:', reason);
-  process.exit(1);
+  gracefulShutdown('UNHANDLED_REJECTION');
 });
 
-// Start the server
-startServer();
+/**
+ * Handle termination signals
+ */
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-module.exports = { server };
+// Start the server
+if (require.main === module) {
+  startServer();
+}
+
+module.exports = { app, startServer, gracefulShutdown };

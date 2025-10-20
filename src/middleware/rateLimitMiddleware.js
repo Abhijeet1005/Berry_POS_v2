@@ -48,6 +48,50 @@ const authLimiter = rateLimit({
 });
 
 /**
+ * Admin endpoints rate limiter (more lenient)
+ */
+const adminLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 200,
+  message: errorResponse(
+    'RATE_LIMIT_EXCEEDED',
+    'Too many admin requests, please try again later'
+  ),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json(
+      errorResponse(
+        'RATE_LIMIT_EXCEEDED',
+        'Too many admin requests, please try again later'
+      )
+    );
+  }
+});
+
+/**
+ * Payment endpoints rate limiter (very strict)
+ */
+const paymentLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 10,
+  message: errorResponse(
+    'RATE_LIMIT_EXCEEDED',
+    'Too many payment requests, please try again later'
+  ),
+  standardHeaders: true,
+  legacyHeaders: false,
+  handler: (req, res) => {
+    res.status(429).json(
+      errorResponse(
+        'RATE_LIMIT_EXCEEDED',
+        'Too many payment requests, please try again later'
+      )
+    );
+  }
+});
+
+/**
  * Create custom rate limiter
  */
 const createRateLimiter = (windowMs, max) => {
@@ -70,5 +114,7 @@ const createRateLimiter = (windowMs, max) => {
 module.exports = {
   apiLimiter,
   authLimiter,
+  adminLimiter,
+  paymentLimiter,
   createRateLimiter
 };
