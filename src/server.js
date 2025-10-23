@@ -35,16 +35,11 @@ const connectDB = async () => {
 /**
  * Connect to Redis
  */
-const connectRedis = async () => {
+const connectRedisDB = async () => {
   try {
-    if (redis && typeof redis.ping === 'function') {
-      await redis.ping();
-      logger.info('Redis connected successfully');
-    } else if (redis && redis.isOpen) {
-      logger.info('Redis connected successfully');
-    } else {
-      throw new Error('Redis client not properly initialized');
-    }
+    // Call the connectRedis function from redis config
+    await redis.connectRedis();
+    logger.info('Redis connected successfully');
   } catch (error) {
     logger.error('Redis connection error:', error);
     // Don't exit - Redis is optional for some features
@@ -59,7 +54,7 @@ const startServer = async () => {
   try {
     // Connect to databases
     await connectDB();
-    await connectRedis();
+    await connectRedisDB();
 
     // Start Express server
     server = app.listen(PORT, () => {
@@ -108,7 +103,7 @@ const gracefulShutdown = async (signal) => {
         await mongoose.connection.close();
         logger.info('MongoDB connection closed');
 
-        await redis.quit();
+        await redis.disconnectRedis();
         logger.info('Redis connection closed');
 
         logger.info('Graceful shutdown completed');

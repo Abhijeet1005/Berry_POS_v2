@@ -1,4 +1,4 @@
-const redis = require('../config/redis');
+const { getRedisClient } = require('../config/redis');
 const logger = require('../utils/logger');
 
 /**
@@ -6,11 +6,26 @@ const logger = require('../utils/logger');
  */
 class CacheService {
   /**
+   * Get Redis client safely
+   */
+  getClient() {
+    try {
+      return getRedisClient();
+    } catch (error) {
+      logger.warn('Redis client not available:', error.message);
+      return null;
+    }
+  }
+
+  /**
    * Get value from cache
    */
   async get(key) {
     try {
-      const value = await redis.get(key);
+      const client = this.getClient();
+      if (!client) return null;
+
+      const value = await client.get(key);
       
       if (value) {
         return JSON.parse(value);
@@ -28,8 +43,11 @@ class CacheService {
    */
   async set(key, value, ttl = 3600) {
     try {
+      const client = this.getClient();
+      if (!client) return false;
+
       const serialized = JSON.stringify(value);
-      await redis.setex(key, ttl, serialized);
+      await client.setEx(key, ttl, serialized);
       return true;
     } catch (error) {
       logger.error('Cache set error:', error);
@@ -42,7 +60,10 @@ class CacheService {
    */
   async del(key) {
     try {
-      await redis.del(key);
+      const client = this.getClient();
+      if (!client) return false;
+
+      await client.del(key);
       return true;
     } catch (error) {
       logger.error('Cache delete error:', error);
@@ -55,10 +76,13 @@ class CacheService {
    */
   async delPattern(pattern) {
     try {
-      const keys = await redis.keys(pattern);
+      const client = this.getClient();
+      if (!client) return 0;
+
+      const keys = await client.keys(pattern);
       
       if (keys.length > 0) {
-        await redis.del(...keys);
+        await client.del(keys);
       }
       
       return keys.length;
@@ -73,7 +97,10 @@ class CacheService {
    */
   async exists(key) {
     try {
-      const result = await redis.exists(key);
+      const client = this.getClient();
+      if (!client) return false;
+
+      const result = await client.exists(key);
       return result === 1;
     } catch (error) {
       logger.error('Cache exists error:', error);
@@ -86,7 +113,10 @@ class CacheService {
    */
   async expire(key, ttl) {
     try {
-      await redis.expire(key, ttl);
+      const client = this.getClient();
+      if (!client) return false;
+
+      await client.expire(key, ttl);
       return true;
     } catch (error) {
       logger.error('Cache expire error:', error);
@@ -99,7 +129,10 @@ class CacheService {
    */
   async incr(key) {
     try {
-      return await redis.incr(key);
+      const client = this.getClient();
+      if (!client) return null;
+
+      return await client.incr(key);
     } catch (error) {
       logger.error('Cache increment error:', error);
       return null;
@@ -111,7 +144,10 @@ class CacheService {
    */
   async decr(key) {
     try {
-      return await redis.decr(key);
+      const client = this.getClient();
+      if (!client) return null;
+
+      return await client.decr(key);
     } catch (error) {
       logger.error('Cache decrement error:', error);
       return null;
@@ -123,7 +159,10 @@ class CacheService {
    */
   async mget(keys) {
     try {
-      const values = await redis.mget(keys);
+      const client = this.getClient();
+      if (!client) return [];
+
+      const values = await client.mGet(keys);
       return values.map(v => v ? JSON.parse(v) : null);
     } catch (error) {
       logger.error('Cache mget error:', error);
@@ -136,14 +175,17 @@ class CacheService {
    */
   async mset(keyValuePairs, ttl = 3600) {
     try {
-      const pipeline = redis.pipeline();
+      const client = this.getClient();
+      if (!client) return false;
+
+      const multi = client.multi();
       
       Object.entries(keyValuePairs).forEach(([key, value]) => {
         const serialized = JSON.stringify(value);
-        pipeline.setex(key, ttl, serialized);
+        multi.setEx(key, ttl, serialized);
       });
       
-      await pipeline.exec();
+      await multi.exec();
       return true;
     } catch (error) {
       logger.error('Cache mset error:', error);
@@ -215,7 +257,10 @@ class CacheService {
    */
   async flushAll() {
     try {
-      await redis.flushall();
+      const client = this.getClient();
+      if (!client) return false;
+
+      await client.flushAll();
       logger.warn('Cache flushed - all keys deleted');
       return true;
     } catch (error) {
