@@ -44,10 +44,39 @@ A comprehensive multi-tenant restaurant management POS system backend built with
 
 ## Prerequisites
 
-- Node.js >= 14.x
-- MongoDB >= 4.x
-- Redis >= 6.x
+- Node.js >= 18.x
+- MongoDB >= 5.x
+- Redis >= 6.x (optional - app works without it)
 - npm or yarn
+
+## Quick Start
+
+### 1. Install Dependencies
+```bash
+npm install
+```
+
+### 2. Configure Environment
+```bash
+cp .env.example .env
+# Edit .env with your configuration
+```
+
+### 3. Create Global Admin
+```bash
+npm run setup:admin
+# Follow prompts to create super admin
+```
+
+### 4. Start Server
+```bash
+npm run dev
+```
+
+### 5. Access API Documentation
+Open http://localhost:3000/api-docs
+
+**📖 For detailed setup instructions, see [GETTING_STARTED.md](GETTING_STARTED.md)**
 
 ## Installation
 

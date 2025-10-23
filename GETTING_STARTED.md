@@ -1,135 +1,237 @@
-# Getting Started with Berry & Blocks POS System
+# 🚀 Getting Started with Berry & Blocks POS System
 
-This guide will help you set up and start using the Berry & Blocks POS system from scratch.
+Complete guide to set up and run your restaurant POS system in 30 minutes.
 
-## Table of Contents
-1. [Installation](#installation)
-2. [Initial Setup](#initial-setup)
-3. [Creating Your First Tenant](#creating-your-first-tenant)
-4. [Setting Up Your Restaurant](#setting-up-your-restaurant)
-5. [Adding Menu Items](#adding-menu-items)
-6. [Managing Tables](#managing-tables)
-7. [Processing Orders](#processing-orders)
-8. [Handling Payments](#handling-payments)
-9. [User Roles & Permissions](#user-roles--permissions)
+## 📋 Quick Navigation
+
+- [Prerequisites](#prerequisites) - What you need installed
+- [Installation](#installation) - Get the code running
+- [First Setup](#first-setup) - Create your restaurant
+- [Menu Setup](#menu-setup) - Add categories and dishes
+- [Table Setup](#table-setup) - Configure tables
+- [Order Flow](#order-flow) - Process your first order
+- [Testing](#testing) - Use Postman collection
+- [Troubleshooting](#troubleshooting) - Common issues
+
+---
+
+## Prerequisites
+
+### Required Software
+
+| Software | Version | Download | Required? |
+|----------|---------|----------|-----------|
+| Node.js | 18+ | https://nodejs.org | ✅ Yes |
+| MongoDB | 5.0+ | https://mongodb.com/download | ✅ Yes |
+| Redis | 6.0+ | https://redis.io/download | ⚠️ Optional |
+| Git | Latest | https://git-scm.com | ✅ Yes |
+
+**Note:** Redis is optional - the app works without it (just no caching).
+
+### Verify Installation
+
+```bash
+node --version   # Should show v18.0.0 or higher
+npm --version    # Should show 9.0.0 or higher
+mongod --version # Should show MongoDB version
+git --version    # Should show Git version
+```
 
 ---
 
 ## Installation
 
-### Prerequisites
-- Node.js 18 or higher
-- MongoDB 6 or higher
-- Redis 7 or higher
-
-### Step 1: Clone and Install
+### 1. Clone Repository
 
 ```bash
-# Clone the repository
-git clone <repository-url>
+git clone <your-repository-url>
 cd berry-blocks-pos-backend
-
-# Install dependencies
-npm install
-
-# Create environment file
-cp .env.example .env
 ```
 
-### Step 2: Configure Environment
+### 2. Install Dependencies
 
-Edit `.env` file with your configuration:
+```bash
+npm install
+# Wait 2-3 minutes for installation
+```
+
+### 3. Configure Environment
+
+```bash
+# Copy example file
+cp .env.example .env
+
+# Edit .env file with your settings
+```
+
+**Minimum Required Configuration:**
 
 ```env
+# Server
 NODE_ENV=development
 PORT=3000
 
-# Database
-MONGODB_URI=mongodb://localhost:27017/berry-blocks
+# Database (REQUIRED)
+MONGODB_URI=mongodb://localhost:27017/berry-blocks-pos
 
-# Redis
+# JWT Secrets (REQUIRED - Change these!)
+JWT_SECRET=change-this-to-random-64-char-string
+JWT_REFRESH_SECRET=change-this-to-another-random-string
+
+# Redis (OPTIONAL)
 REDIS_HOST=localhost
 REDIS_PORT=6379
 
-# JWT Secrets (change these!)
-JWT_SECRET=your-super-secret-jwt-key-change-this
-REFRESH_TOKEN_SECRET=your-refresh-secret-change-this
-
-# Optional: Payment Gateway
-RAZORPAY_KEY_ID=your_razorpay_key
-RAZORPAY_KEY_SECRET=your_razorpay_secret
+# Razorpay (OPTIONAL - for online payments)
+RAZORPAY_KEY_ID=
+RAZORPAY_KEY_SECRET=
 ```
 
-### Step 3: Start Services
+**Generate Secure Secrets:**
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+# Run twice, use output for JWT_SECRET and JWT_REFRESH_SECRET
+```
+
+### 4. Start Services
 
 ```bash
-# Start MongoDB (if not running)
+# Terminal 1: Start MongoDB
 mongod
 
-# Start Redis (if not running)
+# Terminal 2: Start Redis (optional)
 redis-server
 
-# Start the application
-npm start
-
-# For development with auto-reload
+# Terminal 3: Start Application
 npm run dev
 ```
 
-The server will start at `http://localhost:3000`
+**Expected Output:**
+```
+✓ MongoDB connected successfully
+✓ Redis connected (or warning if not available)
+✓ Server started on port 3000
+✓ API Docs: http://localhost:3000/api-docs
+```
 
----
-
-## Initial Setup
-
-### Health Check
-
-Verify the server is running:
+### 5. Verify Installation
 
 ```bash
+# Health check
 curl http://localhost:3000/health
+
+# Should return: {"status":"ok",...}
 ```
 
-Expected response:
-```json
-{
-  "status": "ok",
-  "timestamp": "2024-01-01T00:00:00.000Z",
-  "uptime": 123.45
-}
-```
+**Open API Documentation:**
+http://localhost:3000/api-docs
 
 ---
 
-## Creating Your First Tenant
+## First Setup
 
-### Scenario 1: Single Restaurant (Standalone Outlet)
+### Understanding the Setup Flow
 
-If you're running a single restaurant:
+To avoid the chicken-and-egg problem (needing a tenant to create an admin, but needing an admin to create a tenant), we follow this approach:
 
-**Step 1: Register as Admin**
+```
+1. Create Global/Super Admin (no tenant required)
+   ↓
+2. Login as Global Admin
+   ↓
+3. Create Tenant/Outlet
+   ↓
+4. Create Outlet Admin (linked to tenant)
+   ↓
+5. Outlet Admin manages their restaurant
+```
+
+### Step 1: Create Global Admin (First Time Only)
+
+**This is a special admin that can create tenants. You only do this once.**
+
+#### Option A: Using the Setup Script (Recommended)
+
+```bash
+# Run the global admin creation script
+node scripts/createGlobalAdmin.js
+
+# Follow the prompts to enter email and password
+# Or provide via environment variables:
+ADMIN_EMAIL=superadmin@berryblocks.com ADMIN_PASSWORD=SuperAdmin123! node scripts/createGlobalAdmin.js
+```
+
+**The script will:**
+- ✅ Check if global admin already exists
+- ✅ Validate email and password
+- ✅ Create the global admin account
+- ✅ Display credentials and next steps
+
+#### Option B: Using API (Manual)
 
 ```bash
 POST http://localhost:3000/api/v1/auth/register
 Content-Type: application/json
 
 {
-  "email": "owner@myrestaurant.com",
-  "password": "SecurePass123!",
-  "firstName": "John",
-  "lastName": "Doe",
-  "phone": "9876543210",
+  "email": "superadmin@berryblocks.com",
+  "password": "SuperAdmin123!@#",
+  "firstName": "Super",
+  "lastName": "Admin",
+  "phone": "9999999999",
   "role": "admin",
-  "tenantId": "TEMP_ID",  // Will be replaced
-  "outletId": "TEMP_ID"   // Will be replaced
+  "tenantId": "global",
+  "outletId": "global"
 }
 ```
 
-**Step 2: Create Your Outlet Tenant**
+**💾 Save the `accessToken` from response!**
+
+**⚠️ Important Notes:**
+- Use `"tenantId": "global"` and `"outletId": "global"` for the super admin
+- This admin can create tenants and manage the entire system
+- Keep these credentials secure - this is your master account
+- You only create this once during initial setup
+
+### Step 2: Login as Global Admin
+
+```bash
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "superadmin@berryblocks.com",
+  "password": "SuperAdmin123!@#"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "user": {
+      "_id": "...",
+      "email": "superadmin@berryblocks.com",
+      "role": "admin"
+    },
+    "tokens": {
+      "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+      "refreshToken": "..."
+    }
+  }
+}
+```
+
+**💾 Save this token - use it for creating tenants!**
+
+### Step 3: Create Your Restaurant (Tenant/Outlet)
+
+**Now use the global admin token to create your restaurant:**
 
 ```bash
 POST http://localhost:3000/api/v1/tenants
-Authorization: Bearer <your_token>
+Authorization: Bearer <global_admin_token>
 Content-Type: application/json
 
 {
@@ -139,198 +241,233 @@ Content-Type: application/json
     "email": "contact@myrestaurant.com",
     "phone": "9876543210",
     "address": {
-      "street": "123 Main Street",
+      "street": "123 Main St",
       "city": "Mumbai",
       "state": "Maharashtra",
       "country": "India",
       "zipCode": "400001"
     }
+  },
+  "settings": {
+    "currency": "INR",
+    "timezone": "Asia/Kolkata",
+    "taxRate": 5,
+    "serviceCharge": 0
   }
 }
 ```
 
-### Scenario 2: Restaurant Chain (Company → Brands → Outlets)
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "_id": "67123abc456def789...",
+    "type": "outlet",
+    "name": "My Restaurant",
+    ...
+  }
+}
+```
 
-If you're managing multiple brands/outlets:
+**💾 Save the `_id` - this is your `outlet_id`!**
 
-**Step 1: Create Company**
+### Step 4: Create Outlet Admin
+
+**Create an admin specifically for this restaurant:**
 
 ```bash
+POST http://localhost:3000/api/v1/auth/register
+Authorization: Bearer <global_admin_token>
+Content-Type: application/json
+
+{
+  "email": "admin@myrestaurant.com",
+  "password": "Admin123!@#",
+  "firstName": "John",
+  "lastName": "Doe",
+  "phone": "9876543210",
+  "role": "admin",
+  "tenantId": "<outlet_id_from_step_3>",
+  "outletId": "<outlet_id_from_step_3>"
+}
+```
+
+**💾 Save the outlet admin credentials!**
+
+### Step 5: Login as Outlet Admin
+
+**From now on, use the outlet admin for daily operations:**
+
+```bash
+POST http://localhost:3000/api/v1/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@myrestaurant.com",
+  "password": "Admin123!@#"
+}
+```
+
+**Use this token for all restaurant operations:**
+```
+Authorization: Bearer <outlet_admin_token>
+```
+
+### Setup Summary
+
+| Account | Purpose | When to Use |
+|---------|---------|-------------|
+| **Global Admin** | Create tenants, system-wide management | Initial setup, adding new restaurants |
+| **Outlet Admin** | Manage specific restaurant | Daily operations, menu, staff, orders |
+
+**🎯 You're now ready to set up your menu, tables, and start taking orders!**
+
+---
+
+## Managing Multiple Restaurants
+
+### Adding More Restaurants
+
+If you want to add more restaurant locations, use the **Global Admin** account:
+
+**1. Login as Global Admin:**
+```bash
+POST http://localhost:3000/api/v1/auth/login
+
+{
+  "email": "superadmin@berryblocks.com",
+  "password": "SuperAdmin123!@#"
+}
+```
+
+**2. Create New Outlet:**
+```bash
 POST http://localhost:3000/api/v1/tenants
-Authorization: Bearer <admin_token>
+Authorization: Bearer <global_admin_token>
+
+{
+  "type": "outlet",
+  "name": "My Restaurant - Branch 2",
+  "contactInfo": {
+    "email": "branch2@myrestaurant.com",
+    "phone": "9876543211",
+    "address": {
+      "street": "456 Another St",
+      "city": "Delhi",
+      "state": "Delhi",
+      "country": "India",
+      "zipCode": "110001"
+    }
+  }
+}
+```
+
+**3. Create Admin for New Outlet:**
+```bash
+POST http://localhost:3000/api/v1/auth/register
+Authorization: Bearer <global_admin_token>
+
+{
+  "email": "admin.branch2@myrestaurant.com",
+  "password": "Admin123!@#",
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "phone": "9876543211",
+  "role": "admin",
+  "tenantId": "<new_outlet_id>",
+  "outletId": "<new_outlet_id>"
+}
+```
+
+### Restaurant Chain Structure
+
+For restaurant chains with multiple brands:
+
+**1. Create Company (Parent):**
+```bash
+POST http://localhost:3000/api/v1/tenants
+Authorization: Bearer <global_admin_token>
 
 {
   "type": "company",
   "name": "Restaurant Group Inc",
   "contactInfo": {
     "email": "admin@restaurantgroup.com",
-    "phone": "9876543210",
-    "address": {
-      "street": "Corporate Office",
-      "city": "Mumbai",
-      "state": "Maharashtra",
-      "country": "India",
-      "zipCode": "400001"
-    }
+    "phone": "9876543200"
   }
 }
 ```
 
-**Step 2: Create Brand Under Company**
-
+**2. Create Outlets Under Company:**
 ```bash
 POST http://localhost:3000/api/v1/tenants
+Authorization: Bearer <global_admin_token>
 
 {
-  "type": "brand",
-  "name": "Pizza Paradise",
-  "parentId": "<company_id>",
-  "contactInfo": {
-    "email": "pizza@restaurantgroup.com",
-    "phone": "9876543211"
-  }
-}
-```
-
-**Step 3: Create Outlets Under Brand**
-
-```bash
-POST http://localhost:3000/api/v1/tenants/<brand_id>/outlets
-
-{
+  "type": "outlet",
   "name": "Pizza Paradise - Andheri",
+  "parentTenant": "<company_id>",
   "contactInfo": {
     "email": "andheri@pizzaparadise.com",
-    "phone": "9876543212",
-    "address": {
-      "street": "456 Link Road",
-      "city": "Mumbai",
-      "state": "Maharashtra",
-      "country": "India",
-      "zipCode": "400053"
-    }
+    "phone": "9876543201",
+    "address": { ... }
   }
 }
 ```
 
 ---
 
-## Setting Up Your Restaurant
+## Menu Setup
 
-### 1. Create Staff Users
-
-**Manager:**
-```bash
-POST http://localhost:3000/api/v1/auth/register
-
-{
-  "email": "manager@myrestaurant.com",
-  "password": "ManagerPass123!",
-  "firstName": "Jane",
-  "lastName": "Smith",
-  "phone": "9876543213",
-  "role": "manager",
-  "tenantId": "<your_tenant_id>",
-  "outletId": "<your_outlet_id>"
-}
-```
-
-**Captain (Waiter):**
-```bash
-POST http://localhost:3000/api/v1/auth/register
-
-{
-  "email": "captain@myrestaurant.com",
-  "password": "CaptainPass123!",
-  "firstName": "Raj",
-  "lastName": "Kumar",
-  "phone": "9876543214",
-  "role": "captain",
-  "tenantId": "<your_tenant_id>",
-  "outletId": "<your_outlet_id>"
-}
-```
-
-**Cashier:**
-```bash
-POST http://localhost:3000/api/v1/auth/register
-
-{
-  "email": "cashier@myrestaurant.com",
-  "password": "CashierPass123!",
-  "firstName": "Priya",
-  "lastName": "Sharma",
-  "phone": "9876543215",
-  "role": "cashier",
-  "tenantId": "<your_tenant_id>",
-  "outletId": "<your_outlet_id>"
-}
-```
-
----
-
-## Adding Menu Items
-
-### Step 1: Create Categories
+### Create Categories
 
 ```bash
 POST http://localhost:3000/api/v1/categories
 Authorization: Bearer <token>
+Content-Type: application/json
 
-{
-  "name": "Starters",
-  "description": "Appetizers and starters",
-  "kitchenSection": "kitchen",
-  "displayOrder": 1
-}
+# Starters
+{"name": "Starters", "description": "Appetizers", "kitchenSection": "kitchen", "displayOrder": 1}
+
+# Main Course
+{"name": "Main Course", "description": "Main dishes", "kitchenSection": "kitchen", "displayOrder": 2}
+
+# Beverages
+{"name": "Beverages", "description": "Drinks", "kitchenSection": "bar", "displayOrder": 3}
+
+# Desserts
+{"name": "Desserts", "description": "Sweets", "kitchenSection": "dessert", "displayOrder": 4}
 ```
 
-```bash
-POST http://localhost:3000/api/v1/categories
+### Add Dishes
 
-{
-  "name": "Main Course",
-  "description": "Main dishes",
-  "kitchenSection": "kitchen",
-  "displayOrder": 2
-}
-```
-
-```bash
-POST http://localhost:3000/api/v1/categories
-
-{
-  "name": "Beverages",
-  "description": "Drinks and beverages",
-  "kitchenSection": "bar",
-  "displayOrder": 3
-}
-```
-
-### Step 2: Add Dishes
-
+**Vegetarian Dish:**
 ```bash
 POST http://localhost:3000/api/v1/dishes
 Authorization: Bearer <token>
+Content-Type: application/json
 
 {
   "outletId": "<your_outlet_id>",
   "name": "Paneer Tikka",
   "description": {
-    "short": "Grilled cottage cheese with spices",
-    "detailed": "Marinated cottage cheese cubes grilled to perfection with Indian spices"
+    "short": "Grilled cottage cheese",
+    "detailed": "Marinated paneer grilled with spices"
   },
   "categoryId": "<starters_category_id>",
   "price": 250,
-  "dietaryTags": ["veg", "jain"],
+  "dietaryTags": ["veg"],
   "allergens": ["dairy"],
-  "ingredients": ["paneer", "yogurt", "spices", "bell peppers"],
+  "ingredients": ["paneer", "yogurt", "spices"],
   "prepTime": 20,
   "stock": 50,
-  "taxRate": 5
+  "taxRate": 5,
+  "isAvailable": true
 }
 ```
 
+**Non-Vegetarian Dish:**
 ```bash
 POST http://localhost:3000/api/v1/dishes
 
@@ -338,191 +475,148 @@ POST http://localhost:3000/api/v1/dishes
   "outletId": "<your_outlet_id>",
   "name": "Butter Chicken",
   "description": {
-    "short": "Creamy tomato-based chicken curry",
-    "detailed": "Tender chicken pieces in rich tomato and butter gravy"
+    "short": "Creamy chicken curry",
+    "detailed": "Tender chicken in rich tomato gravy"
   },
   "categoryId": "<main_course_category_id>",
   "price": 350,
-  "portionSizes": [
-    { "name": "Half", "price": 200, "servings": 1 },
-    { "name": "Full", "price": 350, "servings": 2 }
-  ],
   "dietaryTags": ["non-veg"],
   "allergens": ["dairy"],
-  "ingredients": ["chicken", "tomato", "butter", "cream", "spices"],
+  "ingredients": ["chicken", "tomato", "butter", "cream"],
   "prepTime": 25,
   "stock": 30,
-  "taxRate": 5
+  "taxRate": 5,
+  "isAvailable": true
+}
+```
+
+**Beverage:**
+```bash
+POST http://localhost:3000/api/v1/dishes
+
+{
+  "outletId": "<your_outlet_id>",
+  "name": "Mango Lassi",
+  "description": {
+    "short": "Sweet mango yogurt drink",
+    "detailed": "Fresh mango blended with yogurt"
+  },
+  "categoryId": "<beverages_category_id>",
+  "price": 80,
+  "dietaryTags": ["veg"],
+  "allergens": ["dairy"],
+  "prepTime": 5,
+  "stock": 100,
+  "taxRate": 5,
+  "isAvailable": true
 }
 ```
 
 ---
 
-## Managing Tables
+## Table Setup
 
 ### Create Tables
 
 ```bash
 POST http://localhost:3000/api/v1/tables
 Authorization: Bearer <token>
+Content-Type: application/json
 
-{
-  "outletId": "<your_outlet_id>",
-  "tableNumber": "T1",
-  "capacity": 4,
-  "section": "Main Hall"
-}
+# Table 1
+{"outletId": "<outlet_id>", "tableNumber": "T1", "capacity": 4, "section": "Main Hall"}
+
+# Table 2
+{"outletId": "<outlet_id>", "tableNumber": "T2", "capacity": 2, "section": "Main Hall"}
+
+# Table 3
+{"outletId": "<outlet_id>", "tableNumber": "T3", "capacity": 6, "section": "Private"}
+
+# Table 4
+{"outletId": "<outlet_id>", "tableNumber": "T4", "capacity": 4, "section": "Outdoor"}
 ```
 
-```bash
-POST http://localhost:3000/api/v1/tables
-
-{
-  "outletId": "<your_outlet_id>",
-  "tableNumber": "T2",
-  "capacity": 2,
-  "section": "Main Hall"
-}
-```
-
-### Get Table QR Code
+### Generate QR Codes
 
 ```bash
 GET http://localhost:3000/api/v1/tables/<table_id>/qr
 Authorization: Bearer <token>
 ```
 
-The QR code can be printed and placed on tables for contactless ordering.
+**Print and place QR codes on tables for customer self-service ordering.**
 
 ---
 
-## Processing Orders
+## Order Flow
 
-### Step 1: Create an Order
+### Complete Order Example
 
+**1. Create Order:**
 ```bash
 POST http://localhost:3000/api/v1/orders
-Authorization: Bearer <captain_token>
+Authorization: Bearer <token>
+Content-Type: application/json
 
 {
-  "outletId": "<your_outlet_id>",
+  "outletId": "<outlet_id>",
   "tableId": "<table_id>",
   "orderType": "dine-in",
   "items": [
     {
       "dishId": "<paneer_tikka_id>",
-      "quantity": 1
+      "quantity": 2,
+      "customization": "Less spicy"
     },
     {
       "dishId": "<butter_chicken_id>",
-      "quantity": 1,
-      "portionSize": "Full",
-      "customization": "Less spicy"
+      "quantity": 1
+    },
+    {
+      "dishId": "<mango_lassi_id>",
+      "quantity": 2
     }
   ],
   "specialInstructions": "Customer prefers less oil"
 }
 ```
 
-### Step 2: Generate KOT (Kitchen Order Ticket)
-
+**2. Generate KOT (Kitchen Order Ticket):**
 ```bash
 POST http://localhost:3000/api/v1/orders/<order_id>/kot
 Authorization: Bearer <token>
 ```
 
-This automatically routes items to appropriate kitchen sections.
-
-### Step 3: Update KOT Status (Kitchen Staff)
-
+**3. Update Order Status:**
 ```bash
-PATCH http://localhost:3000/api/v1/kots/<kot_id>/status
-Authorization: Bearer <kitchen_token>
+PATCH http://localhost:3000/api/v1/orders/<order_id>/status
+Authorization: Bearer <token>
+Content-Type: application/json
 
-{
-  "status": "preparing"
-}
+{"status": "confirmed"}    # Order confirmed
+{"status": "preparing"}    # Kitchen preparing
+{"status": "ready"}        # Food ready
+{"status": "served"}       # Food served
 ```
 
-```bash
-PATCH http://localhost:3000/api/v1/kots/<kot_id>/status
-
-{
-  "status": "ready"
-}
-```
-
----
-
-## Handling Payments
-
-### Option 1: Cash Payment
-
+**4. Process Payment:**
 ```bash
 POST http://localhost:3000/api/v1/payments
-Authorization: Bearer <cashier_token>
+Authorization: Bearer <token>
+Content-Type: application/json
 
 {
   "orderId": "<order_id>",
-  "amount": 600,
+  "amount": 680,
   "paymentMethods": [
     {
       "method": "cash",
-      "amount": 600
+      "amount": 680
     }
   ]
 }
 ```
 
-### Option 2: Split Payment
-
-```bash
-POST http://localhost:3000/api/v1/payments/split
-Authorization: Bearer <cashier_token>
-
-{
-  "orderId": "<order_id>",
-  "paymentMethods": [
-    {
-      "method": "cash",
-      "amount": 300
-    },
-    {
-      "method": "card",
-      "amount": 300,
-      "transactionId": "TXN123456"
-    }
-  ]
-}
-```
-
-### Option 3: Online Payment (Razorpay)
-
-**Step 1: Create Razorpay Order**
-```bash
-POST http://localhost:3000/api/v1/payments/razorpay/create-order
-Authorization: Bearer <token>
-
-{
-  "orderId": "<order_id>",
-  "amount": 600
-}
-```
-
-**Step 2: Verify Payment (after customer pays)**
-```bash
-POST http://localhost:3000/api/v1/payments/razorpay/verify
-Authorization: Bearer <token>
-
-{
-  "razorpayOrderId": "order_xxx",
-  "razorpayPaymentId": "pay_xxx",
-  "razorpaySignature": "signature_xxx"
-}
-```
-
-### Get Receipt
-
+**5. Get Receipt:**
 ```bash
 GET http://localhost:3000/api/v1/payments/<payment_id>/receipt
 Authorization: Bearer <token>
@@ -530,143 +624,257 @@ Authorization: Bearer <token>
 
 ---
 
+## Customer Self-Service
+
+### Customer Flow
+
+**1. Customer Scans QR Code** → Opens menu
+
+**2. Customer Registers:**
+```bash
+POST http://localhost:3000/api/v1/customer/auth/register
+Content-Type: application/json
+
+{
+  "phone": "9876543210",
+  "name": "Customer Name",
+  "email": "customer@example.com"
+}
+```
+
+**3. Customer Receives OTP** → Verifies
+
+**4. Customer Browses Menu:**
+```bash
+GET http://localhost:3000/api/v1/customer/menu?outletId=<outlet_id>
+# No authentication required
+```
+
+**5. Customer Adds to Cart:**
+```bash
+POST http://localhost:3000/api/v1/customer/cart
+Authorization: Bearer <customer_token>
+Content-Type: application/json
+
+{
+  "dishId": "<dish_id>",
+  "quantity": 2,
+  "customization": "Extra spicy"
+}
+```
+
+**6. Customer Places Order:**
+```bash
+POST http://localhost:3000/api/v1/customer/orders
+Authorization: Bearer <customer_token>
+Content-Type: application/json
+
+{
+  "tableId": "<table_id>",
+  "orderType": "dine-in"
+}
+```
+
+**7. Customer Tracks Order** → Real-time updates via Socket.io
+
+---
+
+## Testing with Postman
+
+### Import Collection
+
+1. **Import Collection:**
+   - File: `Berry_Blocks_POS_Complete_Collection.json`
+   - Contains 150+ endpoints
+
+2. **Import Environment:**
+   - File: `Berry_Blocks_POS_Environment.postman_environment.json`
+   - Pre-configured variables
+
+3. **Select Environment:**
+   - Click environment dropdown
+   - Select "Berry & Blocks POS - Local"
+
+### Quick Test Workflow
+
+1. **Health Check** → Verify server
+2. **Create Tenant** → Save `tenant_id`
+3. **Register User** → Save `access_token`
+4. **Login** → Get fresh token
+5. **Create Category** → Save `category_id`
+6. **Create Dish** → Save `dish_id`
+7. **Create Table** → Save `table_id`
+8. **Create Order** → Save `order_id`
+9. **Process Payment** → Complete!
+
+**All IDs are auto-saved in Postman environment variables!**
+
+---
+
+## Troubleshooting
+
+### MongoDB Connection Failed
+
+```bash
+# Check if MongoDB is running
+ps aux | grep mongod
+
+# Start MongoDB
+mongod
+
+# Or on Windows
+net start MongoDB
+```
+
+### Redis Connection Failed
+
+**This is OK!** The app works without Redis.
+
+To enable Redis:
+```bash
+# Start Redis
+redis-server
+
+# Or use Docker
+docker run -d -p 6379:6379 redis
+```
+
+### Port Already in Use
+
+```bash
+# Find process using port 3000
+lsof -i :3000
+
+# Kill the process
+kill -9 <PID>
+
+# Or use different port in .env
+PORT=3001
+```
+
+### Authentication Errors
+
+1. **Check JWT secrets** are set in `.env`
+2. **Token expired** → Login again
+3. **Wrong role** → Check user permissions
+
+### Cannot Create Order
+
+1. **Check dish exists** and `isAvailable: true`
+2. **Check table exists** and status is `available`
+3. **Check stock** if `trackInventory: true`
+
+### Payment Fails
+
+1. **Verify order total** matches payment amount
+2. **Check order status** is not already `completed`
+3. **For Razorpay:** Verify API keys in `.env`
+
+---
+
 ## User Roles & Permissions
 
-### Admin
-- Full system access
-- Manage tenants, users, subscriptions
-- Access all features
-
-### Manager
-- Manage menu (dishes, categories)
-- Manage staff
-- View reports and analytics
-- Manage coupons and campaigns
-- Handle refunds
-
-### Captain (Waiter)
-- Take orders
-- Manage tables
-- View menu
-- Update order status
-- Cannot access payments or reports
-
-### Cashier
-- Process payments
-- View orders
-- Generate receipts
-- Cannot modify menu or orders
-
-### Kitchen Staff
-- View KOTs
-- Update KOT status
-- View dish details
-- Cannot access other modules
-
----
-
-## Quick Start Checklist
-
-- [ ] Install Node.js, MongoDB, Redis
-- [ ] Clone repository and install dependencies
-- [ ] Configure `.env` file
-- [ ] Start services (MongoDB, Redis, App)
-- [ ] Register admin user
-- [ ] Create tenant (company/brand/outlet)
-- [ ] Create staff users (manager, captain, cashier)
-- [ ] Create menu categories
-- [ ] Add dishes to menu
-- [ ] Create tables with QR codes
-- [ ] Test order flow: Create order → Generate KOT → Process payment
-- [ ] Print table QR codes
-
----
-
-## Common Workflows
-
-### Daily Opening
-1. Manager logs in
-2. Checks stock levels
-3. Updates dish availability
-4. Reviews staff schedule
-
-### Taking an Order
-1. Captain scans table QR or selects table
-2. Creates order with items
-3. Generates KOT
-4. Kitchen receives KOT and starts preparation
-5. Captain serves when ready
-
-### Closing an Order
-1. Customer requests bill
-2. Cashier views order total
-3. Processes payment (cash/card/split)
-4. Generates receipt
-5. Table status updates to available
-
-### End of Day
-1. Manager reviews sales reports
-2. Checks inventory
-3. Reviews staff performance
-4. Closes day in system
-
----
-
-## API Documentation
-
-Once the server is running, access the full API documentation at:
-```
-http://localhost:3000/api-docs
-```
-
----
-
-## Support & Troubleshooting
-
-### Common Issues
-
-**MongoDB Connection Failed**
-- Ensure MongoDB is running: `mongod`
-- Check connection string in `.env`
-
-**Redis Connection Failed**
-- Ensure Redis is running: `redis-server`
-- Check Redis host/port in `.env`
-
-**Authentication Errors**
-- Verify JWT secrets are set in `.env`
-- Check token expiration
-- Ensure user has correct role/permissions
-
-**Payment Failures**
-- For Razorpay: Verify API keys
-- Check webhook configuration
-- Verify signature validation
+| Role | Can Do |
+|------|--------|
+| **Admin** | Everything - full system access |
+| **Manager** | Menu, staff, reports, coupons, refunds |
+| **Captain** | Orders, tables, KOT updates |
+| **Cashier** | Payments, receipts, view orders |
+| **Kitchen Staff** | View KOTs, update cooking status |
+| **Customer** | Browse menu, order, track, feedback |
 
 ---
 
 ## Next Steps
 
-- Set up automated backups
-- Configure email/SMS notifications
-- Integrate WhatsApp Business API
-- Set up analytics dashboards
-- Configure loyalty programs
-- Add more staff users
-- Customize receipt templates
+### Production Deployment
+
+1. **Set up MongoDB Atlas** (cloud database)
+2. **Set up Redis Cloud** (optional)
+3. **Configure environment variables** on hosting platform
+4. **Enable HTTPS** (use Nginx or hosting platform SSL)
+5. **Set up backups** (MongoDB automated backups)
+
+### Advanced Features
+
+- **Loyalty Program** → Reward repeat customers
+- **Coupons & Discounts** → Marketing campaigns
+- **Reservations** → Table booking system
+- **Analytics** → Sales reports and insights
+- **AI Recommendations** → Personalized suggestions
+- **Valet Service** → Parking management
+- **Feedback System** → Customer reviews
+
+### Documentation
+
+- **API Docs:** http://localhost:3000/api-docs
+- **Postman Guide:** `POSTMAN_COLLECTION_GUIDE.md`
+- **Backend Architecture:** `BACKEND_ARCHITECTURE.md`
+- **Database Schema:** `BACKEND_DATABASE_SCHEMA.md`
+- **Data Flow:** `BACKEND_DATA_FLOW.md`
 
 ---
 
-## Security Best Practices
+## Quick Reference
 
-1. **Change default secrets** in `.env`
-2. **Use strong passwords** for all users
-3. **Enable 2FA** for admin accounts
-4. **Regular backups** of MongoDB
-5. **HTTPS in production** (use reverse proxy like Nginx)
-6. **Rate limiting** is enabled by default
-7. **Keep dependencies updated**: `npm audit fix`
+### Essential Endpoints
+
+```bash
+# Health
+GET /health
+
+# Auth
+POST /api/v1/auth/register
+POST /api/v1/auth/login
+
+# Menu
+GET  /api/v1/categories
+GET  /api/v1/dishes
+POST /api/v1/dishes
+
+# Orders
+POST /api/v1/orders
+GET  /api/v1/orders/:id
+POST /api/v1/orders/:id/kot
+
+# Payments
+POST /api/v1/payments
+GET  /api/v1/payments/:id/receipt
+
+# Customer
+GET  /api/v1/customer/menu
+POST /api/v1/customer/orders
+```
+
+### Environment Variables
+
+```env
+# Required
+MONGODB_URI=mongodb://localhost:27017/berry-blocks-pos
+JWT_SECRET=<random-64-char-string>
+JWT_REFRESH_SECRET=<random-64-char-string>
+
+# Optional
+REDIS_HOST=localhost
+RAZORPAY_KEY_ID=<your_key>
+OPENAI_API_KEY=<your_key>
+```
 
 ---
 
-For more detailed information, refer to the main [README.md](README.md) file.
+## Support
+
+- **Documentation:** Check `docs/` folder
+- **API Reference:** http://localhost:3000/api-docs
+- **Postman Collection:** Test all endpoints
+- **Logs:** Check `logs/` directory
+
+---
+
+**🎉 You're all set! Start building your restaurant POS system!**
+
+For detailed information, see:
+- `README.md` - Project overview
+- `API_DOCUMENTATION.md` - Complete API reference
+- `BACKEND_ARCHITECTURE.md` - System architecture
+- `POSTMAN_COLLECTION_GUIDE.md` - Testing guide
