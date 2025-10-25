@@ -1,5 +1,29 @@
 # Berry & Blocks POS API Documentation
 
+## 🚀 Interactive API Documentation (Recommended)
+
+**For complete, interactive, and always up-to-date API documentation, visit:**
+
+```
+http://localhost:3000/api-docs
+```
+
+### Why Use Swagger UI?
+
+The Swagger UI provides the best documentation experience:
+
+- ✅ **All 150+ endpoints** documented with examples
+- ✅ **Try-it-out functionality** - Test APIs directly in browser
+- ✅ **Request/response examples** - See real data structures
+- ✅ **Authentication testing** - Built-in token management
+- ✅ **Schema definitions** - Complete data models
+- ✅ **Always up-to-date** - Auto-generated from code
+- ✅ **19 modules organized** - Easy navigation by feature
+
+**This document provides a quick overview. For detailed, interactive documentation, always refer to the Swagger UI.**
+
+---
+
 ## Overview
 
 The Berry & Blocks POS API is a comprehensive RESTful API for managing restaurant operations including orders, payments, menu, staff, customers, and more.
@@ -9,13 +33,6 @@ The Berry & Blocks POS API is a comprehensive RESTful API for managing restauran
 ```
 Development: http://localhost:3000/api/v1
 Production: https://api.berryblocks.com/api/v1
-```
-
-## Interactive Documentation
-
-Access the interactive Swagger UI documentation at:
-```
-http://localhost:3000/api-docs
 ```
 
 ## Authentication
