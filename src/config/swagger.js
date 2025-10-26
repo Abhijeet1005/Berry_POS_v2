@@ -201,6 +201,38 @@ const options = {
               },
               example: ['Veg']
             },
+            images: {
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  publicId: {
+                    type: 'string',
+                    example: 'berry-blocks-pos/dishes/tenant_123/outlet_456/abc123'
+                  },
+                  url: {
+                    type: 'string',
+                    example: 'https://res.cloudinary.com/your-cloud/image/upload/v1234567890/berry-blocks-pos/dishes/tenant_123/outlet_456/abc123.jpg'
+                  },
+                  width: {
+                    type: 'integer',
+                    example: 1920
+                  },
+                  height: {
+                    type: 'integer',
+                    example: 1080
+                  },
+                  format: {
+                    type: 'string',
+                    example: 'jpg'
+                  },
+                  size: {
+                    type: 'integer',
+                    example: 245678
+                  }
+                }
+              }
+            },
             isAvailable: {
               type: 'boolean',
               example: true

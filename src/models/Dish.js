@@ -35,7 +35,18 @@ const dishSchema = new mongoose.Schema({
     required: true
   },
   images: [{
-    type: String
+    publicId: {
+      type: String,
+      required: true
+    },
+    url: {
+      type: String,
+      required: true
+    },
+    width: Number,
+    height: Number,
+    format: String,
+    size: Number
   }],
   price: {
     type: Number,
@@ -145,7 +156,7 @@ dishSchema.index({ dietaryTags: 1 });
 dishSchema.index({ isAvailable: 1 });
 
 // Update availability based on stock
-dishSchema.pre('save', function(next) {
+dishSchema.pre('save', function (next) {
   if (this.isModified('stock')) {
     this.isAvailable = this.stock > 0;
   }
@@ -153,7 +164,7 @@ dishSchema.pre('save', function(next) {
 });
 
 // Decrement stock
-dishSchema.methods.decrementStock = function(quantity) {
+dishSchema.methods.decrementStock = function (quantity) {
   if (this.stock < quantity) {
     throw new Error('Insufficient stock');
   }
@@ -162,7 +173,7 @@ dishSchema.methods.decrementStock = function(quantity) {
 };
 
 // Increment stock
-dishSchema.methods.incrementStock = function(quantity) {
+dishSchema.methods.incrementStock = function (quantity) {
   this.stock += quantity;
   return this.save();
 };

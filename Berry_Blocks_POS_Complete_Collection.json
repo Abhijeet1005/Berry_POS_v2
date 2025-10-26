@@ -526,6 +526,98 @@
               "path": ["dishes", "{{dish_id}}", "stock"]
             }
           }
+        },
+        {
+          "name": "Upload Dish Images",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dish_id}}/images",
+              "host": ["{{base_url}}"],
+              "path": ["dishes", "{{dish_id}}", "images"]
+            },
+            "description": "Upload images for a dish (up to 5 images). Select multiple files in the 'images' field."
+          }
+        },
+        {
+          "name": "Replace Dish Images",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "images",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dish_id}}/images",
+              "host": ["{{base_url}}"],
+              "path": ["dishes", "{{dish_id}}", "images"]
+            },
+            "description": "Replace all existing images with new ones. Deletes old images and uploads new ones."
+          }
+        },
+        {
+          "name": "Get Square Crop URLs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dish_id}}/images/square?size=400",
+              "host": ["{{base_url}}"],
+              "path": ["dishes", "{{dish_id}}", "images", "square"],
+              "query": [
+                {
+                  "key": "size",
+                  "value": "400",
+                  "description": "Size of square crop (default: 400)"
+                }
+              ]
+            },
+            "description": "Get square-cropped URLs for all dish images. Useful for grid views."
+          }
+        },
+        {
+          "name": "Delete Specific Image",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dish_id}}/images/berry-blocks-pos%2Fdishes%2Ftenant%2Foutlet%2Fimage123",
+              "host": ["{{base_url}}"],
+              "path": ["dishes", "{{dish_id}}", "images", "berry-blocks-pos%2Fdishes%2Ftenant%2Foutlet%2Fimage123"]
+            },
+            "description": "Delete a specific image. Replace the last path segment with the URL-encoded publicId from the image object."
+          }
+        },
+        {
+          "name": "Delete All Images",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/dishes/{{dish_id}}/images",
+              "host": ["{{base_url}}"],
+              "path": ["dishes", "{{dish_id}}", "images"]
+            },
+            "description": "Delete all images from a dish."
+          }
         }
       ]
     },

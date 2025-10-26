@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
 const menuController = require('./menuController');
+const dishImageController = require('./dishImageController');
 const { validate, validateObjectId } = require('../../middleware/validationMiddleware');
 const { authenticate } = require('../../middleware/authMiddleware');
 const { requirePermission } = require('../../middleware/rbacMiddleware');
 const { injectTenantContext } = require('../../middleware/tenantMiddleware');
 const { cacheMiddleware, invalidateCacheMiddleware } = require('../../middleware/cacheMiddleware');
+const { uploadMultiple, handleMulterError } = require('../../middleware/uploadMiddleware');
 const {
   createDishSchema,
   updateDishSchema,
@@ -110,6 +112,72 @@ router.patch(
   requirePermission('dishes.update'),
   validate(updateStockSchema),
   menuController.updateStock
+);
+
+// Dish Image Routes
+
+/**
+ * @route   POST /api/v1/dishes/:dishId/images
+ * @desc    Upload images for a dish
+ * @access  Private (Manager+)
+ */
+router.post(
+  '/dishes/:dishId/images',
+  validateObjectId('dishId'),
+  requirePermission('dishes.update'),
+  uploadMultiple,
+  handleMulterError,
+  dishImageController.uploadImages
+);
+
+/**
+ * @route   PUT /api/v1/dishes/:dishId/images
+ * @desc    Replace all dish images
+ * @access  Private (Manager+)
+ */
+router.put(
+  '/dishes/:dishId/images',
+  validateObjectId('dishId'),
+  requirePermission('dishes.update'),
+  uploadMultiple,
+  handleMulterError,
+  dishImageController.replaceImages
+);
+
+/**
+ * @route   DELETE /api/v1/dishes/:dishId/images/:imagePublicId
+ * @desc    Delete a specific image from dish
+ * @access  Private (Manager+)
+ */
+router.delete(
+  '/dishes/:dishId/images/:imagePublicId',
+  validateObjectId('dishId'),
+  requirePermission('dishes.update'),
+  dishImageController.deleteImage
+);
+
+/**
+ * @route   DELETE /api/v1/dishes/:dishId/images
+ * @desc    Delete all images from dish
+ * @access  Private (Manager+)
+ */
+router.delete(
+  '/dishes/:dishId/images',
+  validateObjectId('dishId'),
+  requirePermission('dishes.update'),
+  dishImageController.deleteAllImages
+);
+
+/**
+ * @route   GET /api/v1/dishes/:dishId/images/square
+ * @desc    Get square crop URLs for dish images
+ * @access  Private
+ */
+router.get(
+  '/dishes/:dishId/images/square',
+  validateObjectId('dishId'),
+  requirePermission('dishes.read'),
+  dishImageController.getSquareCropUrls
 );
 
 // Category Routes

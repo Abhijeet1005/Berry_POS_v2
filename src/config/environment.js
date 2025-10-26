@@ -44,6 +44,12 @@ module.exports = {
     webhookSecret: process.env.RAZORPAY_WEBHOOK_SECRET
   },
   
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET
+  },
+  
   swiggy: {
     apiKey: process.env.SWIGGY_API_KEY,
     webhookSecret: process.env.SWIGGY_WEBHOOK_SECRET

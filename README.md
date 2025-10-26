@@ -11,7 +11,7 @@ A comprehensive multi-tenant restaurant management POS system backend built with
 ### Core Functionality
 - **Multi-Tenant Architecture** - Support for companies, brands, and outlets with complete data isolation
 - **Authentication & Authorization** - JWT-based auth with 2FA, role-based access control (RBAC)
-- **Menu Management** - Dishes, categories, stock tracking, dietary tags, portion sizes
+- **Menu Management** - Dishes, categories, stock tracking, dietary tags, portion sizes, **image uploads (Cloudinary)**
 - **Order Management** - Multi-channel orders (dine-in, takeaway, delivery), KOT generation
 - **Payment Processing** - Razorpay integration, split payments, multiple payment methods
 - **Table Management** - QR code ordering, table transfer/merge, status tracking
@@ -44,7 +44,8 @@ A comprehensive multi-tenant restaurant management POS system backend built with
 - **Logging**: Winston with daily rotation
 - **AI**: OpenAI GPT-3.5/4
 - **Payments**: Razorpay
-- **Storage**: AWS S3
+- **Image Storage**: Cloudinary (CDN + optimization)
+- **File Upload**: Multer
 
 ## Prerequisites
 
@@ -418,6 +419,8 @@ pm2 logs
 - **[BACKEND_DATABASE_SCHEMA.md](BACKEND_DATABASE_SCHEMA.md)** - Complete database schemas
 - **[BACKEND_DATA_FLOW.md](BACKEND_DATA_FLOW.md)** - Data flow and processing
 - **[BACKEND_FEATURES_DEEP_DIVE.md](BACKEND_FEATURES_DEEP_DIVE.md)** - Advanced features explained
+- **[PAYMENT_SYSTEM_EXPLAINED.md](PAYMENT_SYSTEM_EXPLAINED.md)** - Complete payment flow guide
+- **[CLOUDINARY_IMAGE_UPLOAD_GUIDE.md](CLOUDINARY_IMAGE_UPLOAD_GUIDE.md)** - Image upload implementation
 - **[POSTMAN_COLLECTION_GUIDE.md](POSTMAN_COLLECTION_GUIDE.md)** - Postman testing guide
 - **[SETUP_FLOW_SUMMARY.md](SETUP_FLOW_SUMMARY.md)** - Quick setup reference
 
