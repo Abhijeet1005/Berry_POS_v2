@@ -3,7 +3,7 @@ const router = express.Router();
 const customerController = require('./customerController');
 const { customerAuthMiddleware } = require('../../middleware/customerAuthMiddleware');
 const { injectTenantContext } = require('../../middleware/tenantMiddleware');
-const { validate } = require('../../middleware/validationMiddleware');
+const { validate, validateObjectId } = require('../../middleware/validationMiddleware');
 const customerValidation = require('./customerValidation');
 
 // Apply tenant middleware to all routes
@@ -31,7 +31,7 @@ router.post(
 // Menu routes (public - can browse without auth)
 router.get(
   '/menu',
-  validate(customerValidation.getMenu),
+  validate(customerValidation.getMenu, 'query'),
   customerController.getMenu
 );
 
@@ -55,10 +55,11 @@ router.post(
 );
 router.put(
   '/cart/:itemId',
+  validateObjectId('itemId'),
   validate(customerValidation.updateCartItem),
   customerController.updateCartItem
 );
-router.delete('/cart/:itemId', customerController.removeFromCart);
+router.delete('/cart/:itemId', validateObjectId('itemId'), customerController.removeFromCart);
 router.delete('/cart', customerController.clearCart);
 
 // Order routes
@@ -68,9 +69,10 @@ router.post(
   customerController.placeOrder
 );
 router.get('/orders', customerController.getOrders);
-router.get('/orders/:id', customerController.getOrderById);
+router.get('/orders/:id', validateObjectId('id'), customerController.getOrderById);
 router.post(
   '/orders/:id/cancel',
+  validateObjectId('id'),
   validate(customerValidation.cancelOrder),
   customerController.cancelOrder
 );
