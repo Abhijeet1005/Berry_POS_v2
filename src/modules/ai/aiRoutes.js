@@ -4,7 +4,7 @@ const aiController = require('./aiController');
 const { authenticate } = require('../../middleware/authMiddleware');
 const { injectTenantContext } = require('../../middleware/tenantMiddleware');
 const { requirePermission } = require('../../middleware/rbacMiddleware');
-const { validate } = require('../../middleware/validationMiddleware');
+const { validate, validateObjectId } = require('../../middleware/validationMiddleware');
 const aiValidation = require('./aiValidation');
 
 // Apply auth and tenant middleware to all routes
@@ -30,7 +30,8 @@ router.post(
 // Get recommendations (all authenticated users)
 router.get(
   '/recommendations/:customerId',
-  validate(aiValidation.getRecommendations),
+  validateObjectId('customerId'),
+  validate(aiValidation.getRecommendations, 'query'),
   aiController.getRecommendations
 );
 

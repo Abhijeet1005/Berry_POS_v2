@@ -4,7 +4,7 @@ const loyaltyController = require('./loyaltyController');
 const { authenticate } = require('../../middleware/authMiddleware');
 const { injectTenantContext } = require('../../middleware/tenantMiddleware');
 const { requirePermission } = require('../../middleware/rbacMiddleware');
-const { validate } = require('../../middleware/validationMiddleware');
+const { validate, validateObjectId } = require('../../middleware/validationMiddleware');
 const loyaltyValidation = require('./loyaltyValidation');
 
 // Apply auth and tenant middleware to all routes
@@ -14,7 +14,7 @@ router.use(injectTenantContext);
 // Get customer loyalty balance (all authenticated users)
 router.get(
   '/customer/:customerId',
-  validate(loyaltyValidation.getCustomerLoyalty),
+  validateObjectId('customerId'),
   loyaltyController.getCustomerLoyalty
 );
 
@@ -37,13 +37,14 @@ router.post(
 // Get loyalty rules (all authenticated users)
 router.get(
   '/rules',
-  validate(loyaltyValidation.getLoyaltyRules),
+  validate(loyaltyValidation.getLoyaltyRules, 'query'),
   loyaltyController.getLoyaltyRules
 );
 
 // Update loyalty rules (admin, manager)
 router.put(
   '/rules/:outletId',
+  validateObjectId('outletId'),
   requirePermission('loyalty.configure'),
   validate(loyaltyValidation.updateLoyaltyRules),
   loyaltyController.updateLoyaltyRules
@@ -52,7 +53,8 @@ router.put(
 // Get loyalty transaction history (all authenticated users)
 router.get(
   '/history/:customerId',
-  validate(loyaltyValidation.getLoyaltyHistory),
+  validateObjectId('customerId'),
+  validate(loyaltyValidation.getLoyaltyHistory, 'query'),
   loyaltyController.getLoyaltyHistory
 );
 

@@ -17,35 +17,35 @@ router.use(requirePermission('admin.access'));
 // Get sales analytics
 router.get(
   '/sales',
-  validate(analyticsValidation.getSalesAnalytics),
+  validate(analyticsValidation.getSalesAnalytics, 'query'),
   analyticsController.getSalesAnalytics
 );
 
 // Get dish analytics
 router.get(
   '/dishes',
-  validate(analyticsValidation.getDishAnalytics),
+  validate(analyticsValidation.getDishAnalytics, 'query'),
   analyticsController.getDishAnalytics
 );
 
 // Get customer analytics
 router.get(
   '/customers',
-  validate(analyticsValidation.getCustomerAnalytics),
+  validate(analyticsValidation.getCustomerAnalytics, 'query'),
   analyticsController.getCustomerAnalytics
 );
 
 // Get staff analytics
 router.get(
   '/staff',
-  validate(analyticsValidation.getStaffAnalytics),
+  validate(analyticsValidation.getStaffAnalytics, 'query'),
   analyticsController.getStaffAnalytics
 );
 
 // Get campaign analytics
 router.get(
   '/campaigns',
-  validate(analyticsValidation.getCampaignAnalytics),
+  validate(analyticsValidation.getCampaignAnalytics, 'query'),
   analyticsController.getCampaignAnalytics
 );
 

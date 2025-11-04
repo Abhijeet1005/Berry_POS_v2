@@ -4,7 +4,7 @@ const feedbackController = require('./feedbackController');
 const { authenticate } = require('../../middleware/authMiddleware');
 const { injectTenantContext } = require('../../middleware/tenantMiddleware');
 const { requirePermission } = require('../../middleware/rbacMiddleware');
-const { validate } = require('../../middleware/validationMiddleware');
+const { validate, validateObjectId } = require('../../middleware/validationMiddleware');
 const feedbackValidation = require('./feedbackValidation');
 
 // Apply auth and tenant middleware to all routes
@@ -22,7 +22,7 @@ router.post(
 router.get(
   '/',
   requirePermission('admin.access'),
-  validate(feedbackValidation.getAllFeedback),
+  validate(feedbackValidation.getAllFeedback, 'query'),
   feedbackController.getAllFeedback
 );
 
@@ -30,27 +30,28 @@ router.get(
 router.get(
   '/analytics',
   requirePermission('admin.access'),
-  validate(feedbackValidation.getFeedbackAnalytics),
+  validate(feedbackValidation.getFeedbackAnalytics, 'query'),
   feedbackController.getFeedbackAnalytics
 );
 
 // Get feedback by order (all authenticated users)
 router.get(
   '/order/:orderId',
-  validate(feedbackValidation.getFeedbackByOrder),
+  validateObjectId('orderId'),
   feedbackController.getFeedbackByOrder
 );
 
 // Get feedback by ID (all authenticated users)
 router.get(
   '/:id',
-  validate(feedbackValidation.getFeedbackById),
+  validateObjectId('id'),
   feedbackController.getFeedbackById
 );
 
 // Respond to feedback (admin, manager)
 router.post(
   '/:id/respond',
+  validateObjectId('id'),
   requirePermission('admin.access'),
   validate(feedbackValidation.respondToFeedback),
   feedbackController.respondToFeedback
