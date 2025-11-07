@@ -66,18 +66,31 @@ kotSchema.index({ kitchenSection: 1, status: 1 });
 
 // Generate KOT number
 kotSchema.pre('save', async function(next) {
-  if (!this.kotNumber) {
-    const date = new Date();
-    const dateStr = date.toISOString().slice(0, 10).replace(/-/g, '');
-    const count = await mongoose.model('KOT').countDocuments({
-      createdAt: {
-        $gte: new Date(date.setHours(0, 0, 0, 0)),
-        $lt: new Date(date.setHours(23, 59, 59, 999))
-      }
-    });
-    this.kotNumber = `KOT-${dateStr}-${String(count + 1).padStart(4, '0')}`;
+  try {
+    if (!this.kotNumber) {
+      const now = new Date();
+      const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
+      
+      // Create separate date objects for start and end of day
+      const startOfDay = new Date(now);
+      startOfDay.setHours(0, 0, 0, 0);
+      
+      const endOfDay = new Date(now);
+      endOfDay.setHours(23, 59, 59, 999);
+      
+      const count = await mongoose.model('KOT').countDocuments({
+        createdAt: {
+          $gte: startOfDay,
+          $lt: endOfDay
+        }
+      });
+      
+      this.kotNumber = `KOT-${dateStr}-${String(count + 1).padStart(4, '0')}`;
+    }
+    next();
+  } catch (error) {
+    next(error);
   }
-  next();
 });
 
 const KOT = mongoose.model('KOT', kotSchema);
