@@ -1,0 +1,409 @@
+{
+  "navbarSections": [
+    {
+      "id": "dashboard",
+      "label": "Dashboard",
+      "icon": "home",
+      "route": "/dashboard",
+      "roles": ["admin", "manager", "captain", "cashier", "kitchen"],
+      "description": "Overview and quick stats"
+    },
+    {
+      "id": "orders",
+      "label": "Orders",
+      "icon": "receipt",
+      "route": "/orders",
+      "roles": ["admin", "manager", "captain", "cashier", "kitchen"],
+      "description": "Order management and KOT",
+      "subSections": [
+        {
+          "id": "active-orders",
+          "label": "Active Orders",
+          "route": "/orders/active",
+          "roles": ["admin", "manager", "captain", "cashier", "kitchen"]
+        },
+        {
+          "id": "order-history",
+          "label": "Order History",
+          "route": "/orders/history",
+          "roles": ["admin", "manager", "cashier"]
+        },
+        {
+          "id": "kot-management",
+          "label": "KOT Management",
+          "route": "/orders/kot",
+          "roles": ["admin", "manager", "captain", "kitchen"]
+        }
+      ]
+    },
+    {
+      "id": "menu",
+      "label": "Menu Management",
+      "icon": "restaurant_menu",
+      "route": "/menu",
+      "roles": ["admin", "manager"],
+      "description": "Manage dishes and categories",
+      "subSections": [
+        {
+          "id": "dishes",
+          "label": "Dishes",
+          "route": "/menu/dishes",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "categories",
+          "label": "Categories",
+          "route": "/menu/categories",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "availability",
+          "label": "Availability",
+          "route": "/menu/availability",
+          "roles": ["admin", "manager"]
+        }
+      ]
+    },
+    {
+      "id": "tables",
+      "label": "Tables",
+      "icon": "table_restaurant",
+      "route": "/tables",
+      "roles": ["admin", "manager", "captain"],
+      "description": "Table management and layout",
+      "subSections": [
+        {
+          "id": "table-layout",
+          "label": "Table Layout",
+          "route": "/tables/layout",
+          "roles": ["admin", "manager", "captain"]
+        },
+        {
+          "id": "table-management",
+          "label": "Manage Tables",
+          "route": "/tables/manage",
+          "roles": ["admin", "manager"]
+        }
+      ]
+    },
+    {
+      "id": "payments",
+      "label": "Payments",
+      "icon": "payment",
+      "route": "/payments",
+      "roles": ["admin", "manager", "cashier"],
+      "description": "Payment processing and history",
+      "subSections": [
+        {
+          "id": "process-payment",
+          "label": "Process Payment",
+          "route": "/payments/process",
+          "roles": ["admin", "manager", "cashier"]
+        },
+        {
+          "id": "payment-history",
+          "label": "Payment History",
+          "route": "/payments/history",
+          "roles": ["admin", "manager", "cashier"]
+        },
+        {
+          "id": "coupons",
+          "label": "Coupons",
+          "route": "/payments/coupons",
+          "roles": ["admin", "manager", "cashier"]
+        }
+      ]
+    },
+    {
+      "id": "customers",
+      "label": "Customers",
+      "icon": "people",
+      "route": "/customers",
+      "roles": ["admin", "manager", "captain", "cashier"],
+      "description": "Customer management and loyalty",
+      "subSections": [
+        {
+          "id": "customer-list",
+          "label": "Customer List",
+          "route": "/customers/list",
+          "roles": ["admin", "manager", "captain"]
+        },
+        {
+          "id": "loyalty",
+          "label": "Loyalty Program",
+          "route": "/customers/loyalty",
+          "roles": ["admin", "manager", "cashier"]
+        },
+        {
+          "id": "feedback",
+          "label": "Feedback",
+          "route": "/customers/feedback",
+          "roles": ["admin", "manager", "captain"]
+        }
+      ]
+    },
+    {
+      "id": "reservations",
+      "label": "Reservations",
+      "icon": "event",
+      "route": "/reservations",
+      "roles": ["admin", "manager", "captain"],
+      "description": "Table reservations and bookings"
+    },
+    {
+      "id": "valet",
+      "label": "Valet",
+      "icon": "local_parking",
+      "route": "/valet",
+      "roles": ["admin", "manager", "captain"],
+      "description": "Valet parking services"
+    },
+    {
+      "id": "analytics",
+      "label": "Analytics",
+      "icon": "analytics",
+      "route": "/analytics",
+      "roles": ["admin", "manager"],
+      "description": "Reports and analytics",
+      "subSections": [
+        {
+          "id": "sales-analytics",
+          "label": "Sales Analytics",
+          "route": "/analytics/sales",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "dish-performance",
+          "label": "Dish Performance",
+          "route": "/analytics/dishes",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "customer-analytics",
+          "label": "Customer Analytics",
+          "route": "/analytics/customers",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "staff-performance",
+          "label": "Staff Performance",
+          "route": "/analytics/staff",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "reports",
+          "label": "Reports",
+          "route": "/analytics/reports",
+          "roles": ["admin", "manager"]
+        }
+      ]
+    },
+    {
+      "id": "marketing",
+      "label": "Marketing",
+      "icon": "campaign",
+      "route": "/marketing",
+      "roles": ["admin", "manager"],
+      "description": "Marketing campaigns and coupons",
+      "subSections": [
+        {
+          "id": "coupons-management",
+          "label": "Coupons",
+          "route": "/marketing/coupons",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "campaigns",
+          "label": "Campaigns",
+          "route": "/marketing/campaigns",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "notifications",
+          "label": "Notifications",
+          "route": "/marketing/notifications",
+          "roles": ["admin", "manager"]
+        }
+      ]
+    },
+    {
+      "id": "staff",
+      "label": "Staff",
+      "icon": "badge",
+      "route": "/staff",
+      "roles": ["admin", "manager"],
+      "description": "Staff management",
+      "subSections": [
+        {
+          "id": "staff-list",
+          "label": "Staff List",
+          "route": "/staff/list",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "add-staff",
+          "label": "Add Staff",
+          "route": "/staff/add",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "performance",
+          "label": "Performance",
+          "route": "/staff/performance",
+          "roles": ["admin", "manager"]
+        }
+      ]
+    },
+    {
+      "id": "back-office",
+      "label": "Back Office",
+      "icon": "business",
+      "route": "/back-office",
+      "roles": ["admin", "manager"],
+      "description": "Admin and management tools",
+      "subSections": [
+        {
+          "id": "tenants",
+          "label": "Tenants",
+          "route": "/back-office/tenants",
+          "roles": ["admin"]
+        },
+        {
+          "id": "subscriptions",
+          "label": "Subscriptions",
+          "route": "/back-office/subscriptions",
+          "roles": ["admin"]
+        },
+        {
+          "id": "support-tickets",
+          "label": "Support Tickets",
+          "route": "/back-office/tickets",
+          "roles": ["admin"]
+        },
+        {
+          "id": "audit-logs",
+          "label": "Audit Logs",
+          "route": "/back-office/audit",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "sync",
+          "label": "Sync Management",
+          "route": "/back-office/sync",
+          "roles": ["admin", "manager"]
+        }
+      ]
+    },
+    {
+      "id": "ai",
+      "label": "AI Features",
+      "icon": "psychology",
+      "route": "/ai",
+      "roles": ["admin", "manager"],
+      "description": "AI-powered features",
+      "subSections": [
+        {
+          "id": "dish-profiling",
+          "label": "Dish Profiling",
+          "route": "/ai/dish-profiling",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "recommendations",
+          "label": "Recommendations",
+          "route": "/ai/recommendations",
+          "roles": ["admin", "manager"]
+        }
+      ]
+    },
+    {
+      "id": "settings",
+      "label": "Settings",
+      "icon": "settings",
+      "route": "/settings",
+      "roles": ["admin", "manager", "captain", "cashier", "kitchen"],
+      "description": "System and profile settings",
+      "subSections": [
+        {
+          "id": "profile",
+          "label": "Profile",
+          "route": "/settings/profile",
+          "roles": ["admin", "manager", "captain", "cashier", "kitchen"]
+        },
+        {
+          "id": "outlet-settings",
+          "label": "Outlet Settings",
+          "route": "/settings/outlet",
+          "roles": ["admin", "manager"]
+        },
+        {
+          "id": "integrations",
+          "label": "Integrations",
+          "route": "/settings/integrations",
+          "roles": ["admin"]
+        },
+        {
+          "id": "notifications-preferences",
+          "label": "Notifications",
+          "route": "/settings/notifications",
+          "roles": ["admin", "manager", "captain", "cashier", "kitchen"]
+        }
+      ]
+    }
+  ],
+  "roleHierarchy": {
+    "admin": 5,
+    "manager": 4,
+    "captain": 3,
+    "cashier": 2,
+    "kitchen": 1
+  },
+  "permissions": {
+    "admin": ["*"],
+    "manager": [
+      "orders.*",
+      "menu.*",
+      "dishes.*",
+      "categories.*",
+      "tables.*",
+      "staff.read",
+      "staff.create",
+      "staff.update",
+      "reports.*",
+      "analytics.*",
+      "coupons.*",
+      "campaigns.*",
+      "feedback.*",
+      "reservations.*",
+      "valet.*"
+    ],
+    "captain": [
+      "orders.create",
+      "orders.read",
+      "orders.update",
+      "tables.*",
+      "dishes.read",
+      "categories.read",
+      "customers.read",
+      "feedback.create",
+      "reservations.read",
+      "reservations.update",
+      "valet.create",
+      "valet.read"
+    ],
+    "cashier": [
+      "orders.read",
+      "payments.*",
+      "dishes.read",
+      "coupons.validate",
+      "loyalty.read",
+      "loyalty.redeem"
+    ],
+    "kitchen": [
+      "kot.read",
+      "kot.update",
+      "orders.read",
+      "dishes.read"
+    ]
+  }
+}
