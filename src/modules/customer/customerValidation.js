@@ -1,16 +1,19 @@
 const Joi = require('joi');
 
 const register = Joi.object({
+  tenantId: Joi.string().required(),
   name: Joi.string().required(),
   phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
   email: Joi.string().email()
 });
 
 const login = Joi.object({
+  tenantId: Joi.string().required(),
   phone: Joi.string().pattern(/^[0-9]{10}$/).required()
 });
 
 const verifyOTP = Joi.object({
+  tenantId: Joi.string().required(),
   phone: Joi.string().pattern(/^[0-9]{10}$/).required(),
   otp: Joi.string().length(6).required()
 });

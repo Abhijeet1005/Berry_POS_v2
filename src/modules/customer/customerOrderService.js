@@ -5,7 +5,10 @@ const Customer = require('../../models/Customer');
 const { ValidationError, NotFoundError } = require('../../utils/errorHandler');
 const aiService = require('../ai/aiService');
 
-// In-memory cart storage (in production, use Redis)
+// ⚠️ PRODUCTION WARNING: In-memory cart storage will lose data on server restart
+// TODO: Replace with Redis before production deployment
+// Example: const redis = require('../../config/redis');
+// await redis.setex(`cart:${customerId}`, 86400, JSON.stringify(cart)); // 24 hour expiry
 const cartStore = new Map();
 
 /**
@@ -183,6 +186,10 @@ const placeOrder = async (customerId, orderData, tenantId) => {
     }
   }
 
+  // Calculate taxes (5% default)
+  const taxAmount = cart.total * 0.05;
+  const total = cart.total + taxAmount;
+
   // Create order
   const order = new Order({
     tenantId,
@@ -196,21 +203,40 @@ const placeOrder = async (customerId, orderData, tenantId) => {
       name: item.name,
       price: item.price,
       quantity: item.quantity,
-      specialInstructions: item.specialInstructions
+      specialInstructions: item.specialInstructions,
+      status: 'pending'
     })),
     subtotal: cart.total,
-    total: cart.total, // TODO: Apply taxes, discounts
+    taxAmount,
+    total,
     paymentMethod,
     status: 'pending',
-    source: 'customer_app'
+    source: 'customer-app'
   });
 
   await order.save();
 
+  // Decrement stock for each item
+  for (const item of cart.items) {
+    const dish = await Dish.findById(item.dishId);
+    if (dish && dish.stock !== undefined) {
+      await dish.decrementStock(item.quantity);
+    }
+  }
+
+  // Update customer stats
+  const customer = await Customer.findById(customerId);
+  if (customer) {
+    customer.totalOrders += 1;
+    customer.lastOrderDate = new Date();
+    await customer.save();
+  }
+
   // Clear cart
   cartStore.delete(customerId);
 
-  // TODO: Send notification to restaurant
+  // TODO: Send notification to restaurant (implement real-time notification)
+  // TODO: Process payment if paymentMethod is not 'cash'
 
   return order;
 };

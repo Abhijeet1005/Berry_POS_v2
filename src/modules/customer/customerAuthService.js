@@ -3,7 +3,10 @@ const jwt = require('jsonwebtoken');
 const { ValidationError, NotFoundError } = require('../../utils/errorHandler');
 const logger = require('../../utils/logger');
 
-// In-memory OTP storage (in production, use Redis)
+// ⚠️ PRODUCTION WARNING: In-memory OTP storage will lose data on server restart
+// TODO: Replace with Redis before production deployment
+// Example: const redis = require('../../config/redis');
+// await redis.setex(`otp:${phone}`, 600, JSON.stringify(otpData));
 const otpStore = new Map();
 
 /**
@@ -15,11 +18,17 @@ const generateOTP = () => {
 
 /**
  * Send OTP (mock implementation)
+ * ⚠️ PRODUCTION WARNING: This is a mock implementation
+ * TODO: Integrate with real SMS provider before production:
+ * - Twilio: https://www.twilio.com/docs/sms
+ * - AWS SNS: https://aws.amazon.com/sns/
+ * - MSG91: https://msg91.com/
+ * - Gupshup: https://www.gupshup.io/
  */
 const sendOTP = async (phone, otp) => {
   // TODO: Integrate with SMS provider
   logger.info('OTP sent', { phone, otp: otp.substring(0, 2) + '****' });
-  console.log(`OTP for ${phone}: ${otp}`); // For development
+  console.log(`⚠️ DEVELOPMENT MODE - OTP for ${phone}: ${otp}`); // For development only
   return true;
 };
 

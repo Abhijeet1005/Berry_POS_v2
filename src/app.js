@@ -188,6 +188,7 @@ const auditRoutes = require('./modules/audit/auditRoutes');
 const customerRoutes = require('./modules/customer/customerRoutes');
 
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/customer', customerRoutes); // Register customer routes BEFORE wildcard routes
 app.use('/api/v1/tenants', tenantRoutes);
 app.use('/api/v1', menuRoutes);
 app.use('/api/v1', orderRoutes);
@@ -205,7 +206,6 @@ app.use('/api/v1/notifications', notificationRoutes);
 app.use('/api/v1/sync', syncRoutes);
 app.use('/api/v1/admin', adminRoutes);
 app.use('/api/v1/audit', auditRoutes);
-app.use('/api/v1/customer', customerRoutes);
 
 // 404 handler
 app.use(notFoundHandler);

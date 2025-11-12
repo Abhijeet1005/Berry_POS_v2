@@ -1021,7 +1021,7 @@
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"9876543210\",\n  \"name\": \"John Customer\",\n  \"email\": \"customer@example.com\"\n}"
+              "raw": "{\n  \"tenantId\": \"{{tenant_id}}\",\n  \"phone\": \"9876543210\",\n  \"name\": \"John Customer\",\n  \"email\": \"customer@example.com\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/customer/auth/register",
@@ -1040,7 +1040,7 @@
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"9876543210\"\n}"
+              "raw": "{\n  \"tenantId\": \"{{tenant_id}}\",\n  \"phone\": \"9876543210\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/customer/auth/login",
@@ -1051,6 +1051,21 @@
         },
         {
           "name": "Verify OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const response = pm.response.json();",
+                  "    pm.environment.set('customer_token', response.data.token);",
+                  "    pm.environment.set('customer_id', response.data.customer.id);",
+                  "    console.log('✅ Customer token saved to environment');",
+                  "}"
+                ]
+              }
+            }
+          ],
           "request": {
             "auth": {
               "type": "noauth"
@@ -1059,7 +1074,7 @@
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"phone\": \"9876543210\",\n  \"otp\": \"123456\"\n}"
+              "raw": "{\n  \"tenantId\": \"{{tenant_id}}\",\n  \"phone\": \"9876543210\",\n  \"otp\": \"123456\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/customer/auth/verify-otp",
@@ -1087,6 +1102,16 @@
         {
           "name": "Get Customer Profile",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -1099,11 +1124,21 @@
         {
           "name": "Update Customer Profile",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"newemail@example.com\"\n}"
+              "raw": "{\n  \"name\": \"John Updated\",\n  \"email\": \"newemail@example.com\",\n  \"addresses\": [\n    {\n      \"type\": \"home\",\n      \"address\": \"123 Main Street, Apartment 4B\",\n      \"landmark\": \"Near Central Park\",\n      \"city\": \"Mumbai\",\n      \"pincode\": \"400001\"\n    },\n    {\n      \"type\": \"work\",\n      \"address\": \"456 Business Plaza, 5th Floor\",\n      \"landmark\": \"Opposite Metro Station\",\n      \"city\": \"Mumbai\",\n      \"pincode\": \"400002\"\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/customer/profile",
@@ -1115,6 +1150,16 @@
         {
           "name": "Get Cart",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -1127,11 +1172,21 @@
         {
           "name": "Add to Cart",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"dishId\": \"{{dish_id}}\",\n  \"quantity\": 2,\n  \"customization\": \"Extra spicy\"\n}"
+              "raw": "{\n  \"dishId\": \"{{dish_id}}\",\n  \"quantity\": 2,\n  \"specialInstructions\": \"Extra spicy\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/customer/cart",
@@ -1143,6 +1198,16 @@
         {
           "name": "Update Cart Item",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "PUT",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
@@ -1159,6 +1224,16 @@
         {
           "name": "Remove from Cart",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
             "header": [],
             "url": {
@@ -1171,6 +1246,16 @@
         {
           "name": "Clear Cart",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "DELETE",
             "header": [],
             "url": {
@@ -1181,13 +1266,75 @@
           }
         },
         {
-          "name": "Place Order",
+          "name": "Place Order (Dine-in)",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"tableId\": \"{{table_id}}\",\n  \"orderType\": \"dine-in\",\n  \"specialInstructions\": \"Please serve quickly\"\n}"
+              "raw": "{\n  \"outletId\": \"{{outlet_id}}\",\n  \"orderType\": \"dine-in\",\n  \"tableId\": \"{{table_id}}\",\n  \"paymentMethod\": \"cash\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer/orders",
+              "host": ["{{base_url}}"],
+              "path": ["customer", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Place Order (Takeaway)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outletId\": \"{{outlet_id}}\",\n  \"orderType\": \"takeaway\",\n  \"paymentMethod\": \"upi\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/customer/orders",
+              "host": ["{{base_url}}"],
+              "path": ["customer", "orders"]
+            }
+          }
+        },
+        {
+          "name": "Place Order (Delivery)",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [{"key": "Content-Type", "value": "application/json"}],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"outletId\": \"{{outlet_id}}\",\n  \"orderType\": \"delivery\",\n  \"deliveryAddress\": {\n    \"address\": \"123 Main Street, Apartment 4B\",\n    \"landmark\": \"Near Central Park\",\n    \"city\": \"Mumbai\",\n    \"pincode\": \"400001\"\n  },\n  \"paymentMethod\": \"card\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/customer/orders",
@@ -1199,6 +1346,16 @@
         {
           "name": "Get Customer Orders",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -1211,6 +1368,16 @@
         {
           "name": "Get Customer Order by ID",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "GET",
             "header": [],
             "url": {
@@ -1223,6 +1390,16 @@
         {
           "name": "Cancel Order",
           "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{customer_token}}",
+                  "type": "string"
+                }
+              ]
+            },
             "method": "POST",
             "header": [{"key": "Content-Type", "value": "application/json"}],
             "body": {

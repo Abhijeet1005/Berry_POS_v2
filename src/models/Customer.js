@@ -21,6 +21,28 @@ const customerSchema = new mongoose.Schema({
     type: String,
     trim: true
   },
+  isVerified: {
+    type: Boolean,
+    default: false
+  },
+  addresses: [{
+    type: {
+      type: String,
+      enum: ['home', 'work', 'other'],
+      default: 'home'
+    },
+    address: {
+      type: String,
+      required: true
+    },
+    landmark: String,
+    city: String,
+    pincode: String,
+    isDefault: {
+      type: Boolean,
+      default: false
+    }
+  }],
   tasteProfile: {
     preferredDietaryTags: [{
       type: String

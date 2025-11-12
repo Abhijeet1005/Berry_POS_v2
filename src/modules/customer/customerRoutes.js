@@ -2,16 +2,46 @@ const express = require('express');
 const router = express.Router();
 const customerController = require('./customerController');
 const { customerAuthMiddleware } = require('../../middleware/customerAuthMiddleware');
-const { injectTenantContext } = require('../../middleware/tenantMiddleware');
 const { validate, validateObjectId } = require('../../middleware/validationMiddleware');
 const customerValidation = require('./customerValidation');
 
-// Apply tenant middleware to all routes
-router.use(injectTenantContext);
+/**
+ * Customer tenant middleware - gets tenantId from request body/query/header
+ * For public endpoints (register, login) that don't have authentication
+ */
+const customerTenantMiddleware = (req, res, next) => {
+  // Try to get tenantId from multiple sources
+  const tenantId = req.body.tenantId || 
+                   req.query.tenantId || 
+                   req.headers['x-tenant-id'] ||
+                   req.tenantId; // From auth middleware if authenticated
+  
+  if (!tenantId) {
+    return res.status(400).json({
+      success: false,
+      error: {
+        code: 'VALIDATION_ERROR',
+        message: 'tenantId is required (provide in body, query, or x-tenant-id header)'
+      }
+    });
+  }
+  
+  req.tenantId = tenantId;
+  next();
+};
+
+// Apply customer tenant middleware to all routes
+router.use(customerTenantMiddleware);
 
 // Auth routes (public)
 router.post(
   '/auth/register',
+  (req, res, next) => {
+    console.log('✅ Reached customer register route');
+    console.log('TenantId:', req.tenantId);
+    console.log('Body:', req.body);
+    next();
+  },
   validate(customerValidation.register),
   customerController.register
 );
