@@ -90,6 +90,31 @@
       "key": "feedback_id",
       "value": "",
       "type": "string"
+    },
+    {
+      "key": "inventory_item_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "supplier_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "recipe_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "po_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "adjustment_id",
+      "value": "",
+      "type": "string"
     }
   ],
   "item": [
@@ -2773,6 +2798,632 @@
               "path": ["admin", "analytics"]
             }
           }
+        }
+      ]
+    },
+    {
+      "name": "📦 Inventory Management",
+      "item": [
+        {
+          "name": "Inventory Items",
+          "item": [
+            {
+              "name": "Create Inventory Item",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outletId\": \"{{outlet_id}}\",\n  \"name\": \"Tomatoes\",\n  \"category\": \"vegetables\",\n  \"unit\": \"kg\",\n  \"currentStock\": 50,\n  \"minStockLevel\": 10,\n  \"maxStockLevel\": 100,\n  \"reorderPoint\": 15,\n  \"unitCost\": 25.50,\n  \"storageLocation\": \"Cold Storage A1\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/items",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items"]
+                }
+              }
+            },
+            {
+              "name": "Get All Inventory Items",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items?page=1&limit=20",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items"],
+                  "query": [
+                    {"key": "page", "value": "1"},
+                    {"key": "limit", "value": "20"},
+                    {"key": "category", "value": "vegetables", "disabled": true},
+                    {"key": "search", "value": "", "disabled": true}
+                  ]
+                }
+              }
+            },
+            {
+              "name": "Get Inventory Item by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/{{inventory_item_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", "{{inventory_item_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Inventory Item",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fresh Tomatoes\",\n  \"unitCost\": 28.00,\n  \"minStockLevel\": 15\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/{{inventory_item_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", "{{inventory_item_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Inventory Item",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/{{inventory_item_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", "{{inventory_item_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Stock",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"quantity\": 10,\n  \"operation\": \"increment\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/{{inventory_item_id}}/stock",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", "{{inventory_item_id}}", "stock"]
+                }
+              }
+            },
+            {
+              "name": "Get Low Stock Items",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/low-stock",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", "low-stock"]
+                }
+              }
+            },
+            {
+              "name": "Get Reorder Items",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/reorder",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", "reorder"]
+                }
+              }
+            },
+            {
+              "name": "Get Inventory Valuation",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/items/valuation",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "items", "valuation"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Suppliers",
+          "item": [
+            {
+              "name": "Create Supplier",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Fresh Vegetables Co.\",\n  \"contactPerson\": \"John Smith\",\n  \"phone\": \"+91-9876543210\",\n  \"email\": \"contact@freshveggies.com\",\n  \"address\": {\n    \"street\": \"123 Market Street\",\n    \"city\": \"Mumbai\",\n    \"state\": \"Maharashtra\",\n    \"pincode\": \"400001\",\n    \"country\": \"India\"\n  },\n  \"suppliedCategories\": [\"vegetables\", \"fruits\"],\n  \"paymentTerms\": \"Net 30 days\",\n  \"creditDays\": 30\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers"]
+                }
+              }
+            },
+            {
+              "name": "Get All Suppliers",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers"]
+                }
+              }
+            },
+            {
+              "name": "Get Supplier by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers/{{supplier_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers", "{{supplier_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Supplier",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"contactPerson\": \"Jane Doe\",\n  \"phone\": \"+91-9876543211\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers/{{supplier_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers", "{{supplier_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Supplier",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers/{{supplier_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers", "{{supplier_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Supplier Rating",
+              "request": {
+                "method": "PATCH",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"rating\": 4.5\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers/{{supplier_id}}/rating",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers", "{{supplier_id}}", "rating"]
+                }
+              }
+            },
+            {
+              "name": "Get Supplier Performance",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/suppliers/{{supplier_id}}/performance",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "suppliers", "{{supplier_id}}", "performance"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Recipes",
+          "item": [
+            {
+              "name": "Create Recipe",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outletId\": \"{{outlet_id}}\",\n  \"dishId\": \"{{dish_id}}\",\n  \"ingredients\": [\n    {\n      \"inventoryItemId\": \"{{inventory_item_id}}\",\n      \"quantity\": 0.2,\n      \"unit\": \"kg\"\n    }\n  ],\n  \"portionSize\": \"1 serving\",\n  \"preparationNotes\": \"Chop tomatoes finely\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes"]
+                }
+              }
+            },
+            {
+              "name": "Get All Recipes",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes"]
+                }
+              }
+            },
+            {
+              "name": "Get Recipe by Dish ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes/dish/{{dish_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes", "dish", "{{dish_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Recipe by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes/{{recipe_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes", "{{recipe_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Recipe",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"ingredients\": [\n    {\n      \"inventoryItemId\": \"{{inventory_item_id}}\",\n      \"quantity\": 0.25,\n      \"unit\": \"kg\"\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes/{{recipe_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes", "{{recipe_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Recipe",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes/{{recipe_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes", "{{recipe_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Check Recipe Availability",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes/{{recipe_id}}/availability?quantity=5",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes", "{{recipe_id}}", "availability"],
+                  "query": [{"key": "quantity", "value": "5"}]
+                }
+              }
+            },
+            {
+              "name": "Calculate Recipe Cost",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/recipes/{{recipe_id}}/cost",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "recipes", "{{recipe_id}}", "cost"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Purchase Orders",
+          "item": [
+            {
+              "name": "Create Purchase Order",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outletId\": \"{{outlet_id}}\",\n  \"supplierId\": \"{{supplier_id}}\",\n  \"items\": [\n    {\n      \"inventoryItemId\": \"{{inventory_item_id}}\",\n      \"quantity\": 50,\n      \"unit\": \"kg\",\n      \"unitCost\": 25.50\n    }\n  ],\n  \"taxAmount\": 127.50,\n  \"shippingCost\": 50,\n  \"expectedDeliveryDate\": \"2024-11-20\",\n  \"notes\": \"Urgent order\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders"]
+                }
+              }
+            },
+            {
+              "name": "Get All Purchase Orders",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders"]
+                }
+              }
+            },
+            {
+              "name": "Get Purchase Order by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Purchase Order",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"taxAmount\": 150,\n  \"notes\": \"Updated order\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Delete Purchase Order",
+              "request": {
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Submit Purchase Order",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}/submit",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}", "submit"]
+                }
+              }
+            },
+            {
+              "name": "Approve Purchase Order",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Mark as Ordered",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}/order",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}", "order"]
+                }
+              }
+            },
+            {
+              "name": "Receive Goods",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"items\": [\n    {\n      \"itemId\": \"{{inventory_item_id}}\",\n      \"quantity\": 50\n    }\n  ]\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}/receive",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}", "receive"]
+                }
+              }
+            },
+            {
+              "name": "Cancel Purchase Order",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/purchase-orders/{{po_id}}/cancel",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "purchase-orders", "{{po_id}}", "cancel"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Stock Movements",
+          "item": [
+            {
+              "name": "Get Stock Movements",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/movements",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "movements"]
+                }
+              }
+            },
+            {
+              "name": "Get Movements by Item",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/movements/item/{{inventory_item_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "movements", "item", "{{inventory_item_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Get Movement Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/movements/summary",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "movements", "summary"]
+                }
+              }
+            }
+          ]
+        },
+        {
+          "name": "Stock Adjustments",
+          "item": [
+            {
+              "name": "Create Stock Adjustment",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"outletId\": \"{{outlet_id}}\",\n  \"inventoryItemId\": \"{{inventory_item_id}}\",\n  \"adjustmentType\": \"wastage\",\n  \"quantity\": -5,\n  \"unit\": \"kg\",\n  \"reason\": \"Expired vegetables found during inspection\",\n  \"notes\": \"Disposed as per food safety guidelines\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/adjustments",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "adjustments"]
+                }
+              }
+            },
+            {
+              "name": "Get All Stock Adjustments",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/adjustments",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "adjustments"]
+                }
+              }
+            },
+            {
+              "name": "Get Stock Adjustment by ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/adjustments/{{adjustment_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "adjustments", "{{adjustment_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Update Stock Adjustment",
+              "request": {
+                "method": "PUT",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Updated reason for adjustment\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/adjustments/{{adjustment_id}}",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "adjustments", "{{adjustment_id}}"]
+                }
+              }
+            },
+            {
+              "name": "Approve Stock Adjustment",
+              "request": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/adjustments/{{adjustment_id}}/approve",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "adjustments", "{{adjustment_id}}", "approve"]
+                }
+              }
+            },
+            {
+              "name": "Reject Stock Adjustment",
+              "request": {
+                "method": "POST",
+                "header": [{"key": "Content-Type", "value": "application/json"}],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"reason\": \"Insufficient evidence for wastage claim\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/inventory/adjustments/{{adjustment_id}}/reject",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "adjustments", "{{adjustment_id}}", "reject"]
+                }
+              }
+            },
+            {
+              "name": "Get Adjustment Summary",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/inventory/adjustments/summary",
+                  "host": ["{{base_url}}"],
+                  "path": ["inventory", "adjustments", "summary"]
+                }
+              }
+            }
+          ]
         }
       ]
     }

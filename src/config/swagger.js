@@ -368,6 +368,30 @@ const options = {
       {
         name: 'Customer',
         description: 'Customer self-service'
+      },
+      {
+        name: 'Inventory',
+        description: 'Inventory item management'
+      },
+      {
+        name: 'Suppliers',
+        description: 'Supplier management'
+      },
+      {
+        name: 'Recipes',
+        description: 'Recipe and ingredient management'
+      },
+      {
+        name: 'Purchase Orders',
+        description: 'Purchase order management'
+      },
+      {
+        name: 'Stock Movements',
+        description: 'Stock movement tracking'
+      },
+      {
+        name: 'Stock Adjustments',
+        description: 'Stock adjustment management'
       }
     ]
   },

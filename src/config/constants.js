@@ -178,5 +178,69 @@ module.exports = {
     CREATE: 'create',
     UPDATE: 'update',
     DELETE: 'delete'
+  },
+  
+  // Inventory item categories
+  INVENTORY_CATEGORIES: {
+    VEGETABLES: 'vegetables',
+    FRUITS: 'fruits',
+    MEAT: 'meat',
+    SEAFOOD: 'seafood',
+    DAIRY: 'dairy',
+    GRAINS: 'grains',
+    SPICES: 'spices',
+    OILS: 'oils',
+    BEVERAGES: 'beverages',
+    PACKAGING: 'packaging',
+    OTHER: 'other'
+  },
+  
+  // Inventory units
+  INVENTORY_UNITS: {
+    KG: 'kg',
+    GRAM: 'gram',
+    LITER: 'liter',
+    ML: 'ml',
+    PIECE: 'piece',
+    DOZEN: 'dozen',
+    PACKET: 'packet',
+    BOX: 'box'
+  },
+  
+  // Stock movement types
+  STOCK_MOVEMENT_TYPES: {
+    PURCHASE: 'purchase',
+    USAGE: 'usage',
+    ADJUSTMENT: 'adjustment',
+    TRANSFER: 'transfer',
+    WASTAGE: 'wastage',
+    RETURN: 'return'
+  },
+  
+  // Stock adjustment types
+  STOCK_ADJUSTMENT_TYPES: {
+    WASTAGE: 'wastage',
+    DAMAGE: 'damage',
+    THEFT: 'theft',
+    EXPIRY: 'expiry',
+    CORRECTION: 'correction'
+  },
+  
+  // Purchase order statuses
+  PURCHASE_ORDER_STATUS: {
+    DRAFT: 'draft',
+    PENDING: 'pending',
+    APPROVED: 'approved',
+    ORDERED: 'ordered',
+    PARTIALLY_RECEIVED: 'partially-received',
+    RECEIVED: 'received',
+    CANCELLED: 'cancelled'
+  },
+  
+  // Stock adjustment statuses
+  STOCK_ADJUSTMENT_STATUS: {
+    PENDING: 'pending',
+    APPROVED: 'approved',
+    REJECTED: 'rejected'
   }
 };

@@ -871,3 +871,77 @@
     - Implement health check for Redis
     - Implement health check for external services
     - _Requirements: 30_
+
+- [x] 31. Inventory Management System (Phase 2)
+
+  - [x] 31.1 Create inventory models
+
+    - Create InventoryItem model (raw materials/ingredients)
+    - Create Recipe model (links dishes to inventory items with quantities)
+    - Create Supplier model (vendor management)
+    - Create PurchaseOrder model (ordering from suppliers)
+    - Create StockMovement model (track all inventory changes)
+    - Create StockAdjustment model (wastage, damage, theft)
+    - _Requirements: Inventory Management_
+
+  - [x] 31.2 Create inventory module
+
+    - Implement CRUD operations for inventory items
+    - Implement stock level tracking
+    - Implement low stock alerts
+    - Implement inventory valuation
+    - Implement stock movement history
+    - _Requirements: Inventory Management_
+
+  - [x] 31.3 Create recipe management module
+
+    - Implement recipe creation and management
+    - Link dishes to inventory items with quantities
+    - Implement automatic inventory deduction on order
+    - Calculate cost of goods sold (COGS)
+    - Implement recipe costing
+    - _Requirements: Recipe Management_
+
+  - [x] 31.4 Create supplier management module
+
+    - Implement supplier CRUD operations
+    - Manage supplier contact information
+    - Track supplier performance
+    - Manage supplier pricing
+    - _Requirements: Supplier Management_
+
+  - [x] 31.5 Create purchase order module
+
+    - Create purchase orders
+    - Send orders to suppliers
+    - Receive goods and update inventory
+    - Track purchase costs
+    - Implement PO approval workflow
+    - _Requirements: Purchase Management_
+
+  - [x] 31.6 Create inventory reports
+
+    - Current stock levels report
+    - Stock movement history
+    - Low stock alerts
+    - Inventory valuation report
+    - Wastage and adjustment reports
+    - Cost analysis reports
+    - Supplier performance reports
+    - _Requirements: Inventory Reporting_
+
+  - [x] 31.7 Create inventory controller and routes
+
+    - Implement POST /api/v1/inventory/items endpoint
+    - Implement GET /api/v1/inventory/items endpoint
+    - Implement PUT /api/v1/inventory/items/:id endpoint
+    - Implement DELETE /api/v1/inventory/items/:id endpoint
+    - Implement POST /api/v1/inventory/recipes endpoint
+    - Implement GET /api/v1/inventory/recipes endpoint
+    - Implement POST /api/v1/inventory/suppliers endpoint
+    - Implement GET /api/v1/inventory/suppliers endpoint
+    - Implement POST /api/v1/inventory/purchase-orders endpoint
+    - Implement GET /api/v1/inventory/purchase-orders endpoint
+    - Implement POST /api/v1/inventory/adjustments endpoint
+    - Implement GET /api/v1/inventory/reports endpoint
+    - _Requirements: Inventory Management_

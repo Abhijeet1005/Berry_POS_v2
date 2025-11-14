@@ -22,7 +22,12 @@ const permissions = {
     'campaigns.*',
     'feedback.*',
     'reservations.*',
-    'valet.*'
+    'valet.*',
+    'inventory.*',
+    'recipes.*',
+    'suppliers.*',
+    'purchase-orders.*',
+    'stock-adjustments.*'
   ],
   
   [ROLES.CAPTAIN]: [
@@ -37,7 +42,10 @@ const permissions = {
     'reservations.read',
     'reservations.update',
     'valet.create',
-    'valet.read'
+    'valet.read',
+    'inventory.read',
+    'recipes.read',
+    'stock-adjustments.create'
   ],
   
   [ROLES.CASHIER]: [
@@ -53,7 +61,9 @@ const permissions = {
     'kot.read',
     'kot.update',
     'orders.read',
-    'dishes.read'
+    'dishes.read',
+    'inventory.read',
+    'recipes.read'
   ]
 };
 
