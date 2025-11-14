@@ -1,5 +1,5 @@
 const Joi = require('joi');
-const { commonSchemas } = require('../../utils/validationHelper');
+const { commonSchemas } = require('../../middleware/validationMiddleware');
 const { 
   INVENTORY_CATEGORIES, 
   INVENTORY_UNITS, 
