@@ -187,10 +187,12 @@ const adminRoutes = require('./modules/admin/adminRoutes');
 const auditRoutes = require('./modules/audit/auditRoutes');
 const customerRoutes = require('./modules/customer/customerRoutes');
 const inventoryRoutes = require('./modules/inventory/inventoryRoutes');
+const dynoApiRoutes = require('./modules/integrations/dynoapi/dynoApiRoutes');
 
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/customer', customerRoutes); // Register customer routes BEFORE wildcard routes
 app.use('/api/v1/inventory', inventoryRoutes);
+app.use('/api/v1/integrations/dynoapi', dynoApiRoutes);
 app.use('/api/v1/tenants', tenantRoutes);
 app.use('/api/v1', menuRoutes);
 app.use('/api/v1', orderRoutes);

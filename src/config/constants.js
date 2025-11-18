@@ -242,5 +242,30 @@ module.exports = {
     PENDING: 'pending',
     APPROVED: 'approved',
     REJECTED: 'rejected'
+  },
+  
+  // DynoAPI Integration
+  DYNOAPI_PLATFORMS: {
+    SWIGGY: 'swiggy',
+    ZOMATO: 'zomato'
+  },
+  
+  // Platform order status mapping
+  PLATFORM_ORDER_STATUS: {
+    // Swiggy statuses
+    SWIGGY_NEW: 'new',
+    SWIGGY_ACCEPTED: 'accepted',
+    SWIGGY_READY: 'ready',
+    SWIGGY_PICKED_UP: 'picked_up',
+    SWIGGY_DELIVERED: 'delivered',
+    SWIGGY_CANCELLED: 'cancelled',
+    
+    // Zomato statuses
+    ZOMATO_NEW: 'new',
+    ZOMATO_ACCEPTED: 'accepted',
+    ZOMATO_READY: 'ready',
+    ZOMATO_PICKED_UP: 'picked_up',
+    ZOMATO_DELIVERED: 'delivered',
+    ZOMATO_CANCELLED: 'cancelled'
   }
 };

@@ -2,9 +2,19 @@ const Order = require('../../models/Order');
 const Dish = require('../../models/Dish');
 const Table = require('../../models/Table');
 const Customer = require('../../models/Customer');
+const Recipe = require('../../models/Recipe');
 const { NotFoundError, ValidationError } = require('../../utils/errorHandler');
 const { parsePaginationParams, buildPaginationMeta } = require('../../utils/paginationHelper');
 const { ORDER_STATUS, TABLE_STATUS } = require('../../config/constants');
+
+// DynoAPI integration (lazy load to avoid circular dependencies)
+let orderSyncService;
+const getOrderSyncService = () => {
+  if (!orderSyncService) {
+    orderSyncService = require('../integrations/dynoapi/orderSyncService');
+  }
+  return orderSyncService;
+};
 
 /**
  * Create a new order
@@ -49,13 +59,35 @@ const createOrder = async (orderData, tenantId, userId) => {
       throw new ValidationError(`Dish "${dish.name}" is not available`);
     }
     
-    // Check stock
-    if (dish.stock < item.quantity) {
-      throw new ValidationError(`Insufficient stock for dish "${dish.name}"`);
-    }
+    // Check if recipe exists for this dish
+    const recipe = await Recipe.findOne({
+      tenantId,
+      outletId: orderData.outletId,
+      dishId: item.dishId,
+      isActive: true
+    });
     
-    // Decrement stock
-    await dish.decrementStock(item.quantity);
+    // If recipe exists, check ingredient availability
+    if (recipe) {
+      const availability = await recipe.checkAvailability(item.quantity);
+      
+      if (!availability.available) {
+        const missingItems = availability.unavailableItems
+          .map(i => `${i.name} (need ${i.required}${i.unit || ''}, have ${i.available}${i.unit || ''})`)
+          .join(', ');
+        throw new ValidationError(
+          `Cannot prepare "${dish.name}". Insufficient ingredients: ${missingItems}`
+        );
+      }
+    } else {
+      // If no recipe, fall back to dish stock (for pre-made items)
+      if (dish.stock < item.quantity) {
+        throw new ValidationError(`Insufficient stock for dish "${dish.name}"`);
+      }
+      
+      // Decrement dish stock
+      await dish.decrementStock(item.quantity);
+    }
     
     const itemPrice = item.portionSize 
       ? dish.portionSizes.find(p => p.name === item.portionSize)?.price || dish.price
@@ -96,6 +128,27 @@ const createOrder = async (orderData, tenantId, userId) => {
   });
   
   await order.save();
+  
+  // Deduct inventory for items with recipes
+  try {
+    for (const item of items) {
+      const recipe = await Recipe.findOne({
+        tenantId,
+        outletId: orderData.outletId,
+        dishId: item.dishId,
+        isActive: true
+      });
+      
+      if (recipe) {
+        // Deduct inventory using recipe method
+        await recipe.deductInventory(item.quantity);
+      }
+    }
+  } catch (error) {
+    // Log error but don't fail the order (order is already created)
+    console.error('Failed to deduct inventory:', error);
+    // In production, you might want to create a notification for manager
+  }
   
   // Update table with current order
   if (tableId) {
@@ -230,6 +283,17 @@ const updateOrderStatus = async (orderId, status, tenantId) => {
   }
   
   await order.save();
+  
+  // Sync status to platform if order is from Swiggy/Zomato
+  try {
+    if (order.source === 'swiggy' || order.source === 'zomato') {
+      const syncService = getOrderSyncService();
+      await syncService.syncOrderStatus(order._id, status);
+    }
+  } catch (error) {
+    // Log but don't fail the order update
+    console.error('Error syncing order status to platform:', error);
+  }
   
   return order;
 };

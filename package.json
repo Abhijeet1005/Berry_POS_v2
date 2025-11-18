@@ -6,8 +6,12 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "test": "jest --coverage",
+    "test": "jest --coverage --verbose",
+    "test:unit": "jest tests/unit --coverage",
+    "test:integration": "jest tests/integration --coverage",
+    "test:health": "jest tests/health --verbose",
     "test:watch": "jest --watch",
+    "test:all": "npm run test:health && npm run test:unit && npm run test:integration",
     "setup:admin": "node scripts/createGlobalAdmin.js"
   },
   "keywords": [

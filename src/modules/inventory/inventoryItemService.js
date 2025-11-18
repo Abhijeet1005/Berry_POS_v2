@@ -2,6 +2,20 @@ const InventoryItem = require('../../models/InventoryItem');
 const { NotFoundError, ValidationError } = require('../../utils/errorHandler');
 const { parsePaginationParams, buildPaginationMeta } = require('../../utils/paginationHelper');
 
+// DynoAPI integration (lazy load to avoid circular dependencies)
+let itemSyncService;
+const getItemSyncService = () => {
+  if (!itemSyncService) {
+    try {
+      itemSyncService = require('../integrations/dynoapi/itemSyncService');
+    } catch (error) {
+      // DynoAPI module might not be available
+      itemSyncService = null;
+    }
+  }
+  return itemSyncService;
+};
+
 /**
  * Create inventory item
  */
@@ -116,7 +130,34 @@ const updateStock = async (itemId, quantity, operation, tenantId) => {
     throw new NotFoundError('Inventory item');
   }
   
+  const previousStock = item.currentStock;
   await item.updateStock(quantity, operation);
+  
+  // Sync to platforms if stock availability changed
+  try {
+    const syncService = getItemSyncService();
+    if (syncService) {
+      const wasOutOfStock = previousStock === 0;
+      const isNowOutOfStock = item.currentStock === 0;
+      
+      // Only sync if availability changed
+      if (wasOutOfStock !== isNowOutOfStock) {
+        // Find dishes using this inventory item
+        const Recipe = require('../../models/Recipe');
+        const recipes = await Recipe.find({
+          'ingredients.inventoryItemId': itemId,
+          isActive: true
+        });
+        
+        for (const recipe of recipes) {
+          await syncService.syncDishAvailability(recipe.dishId, item.currentStock > 0);
+        }
+      }
+    }
+  } catch (error) {
+    // Log but don't fail the stock update
+    console.error('Error syncing item availability to platforms:', error);
+  }
   
   return item;
 };

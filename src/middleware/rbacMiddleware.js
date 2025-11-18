@@ -27,7 +27,8 @@ const permissions = {
     'recipes.*',
     'suppliers.*',
     'purchase-orders.*',
-    'stock-adjustments.*'
+    'stock-adjustments.*',
+    'integrations.*'
   ],
   
   [ROLES.CAPTAIN]: [

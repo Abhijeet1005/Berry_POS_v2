@@ -45,3 +45,4 @@ build/
 tmp/
 temp/
 ANALYTICS_API_FOR_UI.md
+dynoapi.json
