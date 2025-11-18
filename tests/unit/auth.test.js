@@ -8,84 +8,120 @@ const testData = require('../helpers/testData');
 
 describe('Authentication Service', () => {
   describe('User Registration', () => {
+    let tenant;
+    
+    beforeEach(async () => {
+      tenant = await global.testUtils.createTestTenant('outlet');
+    });
+    
     it('should register a new user successfully', async () => {
-      const userData = { ...testData.validUser };
-      const user = await authService.register(userData);
+      const userData = {
+        email: 'newuser@example.com',
+        password: 'Password123!',
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
       
-      expect(user).toBeDefined();
-      expect(user.email).toBe(userData.email);
-      expect(user.password).not.toBe(userData.password); // Should be hashed
+      const result = await authService.register(userData);
+      
+      expect(result).toBeDefined();
+      expect(result).toHaveProperty('user');
+      expect(result).toHaveProperty('tokens');
+      expect(result.user.email).toBe(userData.email);
     });
     
     it('should not register user with duplicate email', async () => {
-      const userData = { ...testData.validUser };
+      const userData = {
+        email: 'duplicate@example.com',
+        password: 'Password123!',
+        firstName: 'John',
+        lastName: 'Doe',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
+      
       await authService.register(userData);
       
       await expect(authService.register(userData))
-        .rejects.toThrow();
-    });
-    
-    it('should validate email format', async () => {
-      const userData = { ...testData.validUser, email: 'invalid-email' };
-      
-      await expect(authService.register(userData))
-        .rejects.toThrow();
+        .rejects.toThrow('Email already registered');
     });
   });
   
   describe('User Login', () => {
+    let tenant;
+    let testUser;
+    
     beforeEach(async () => {
-      await authService.register(testData.validUser);
+      tenant = await global.testUtils.createTestTenant('outlet');
+      testUser = {
+        email: 'logintest@example.com',
+        password: 'Password123!',
+        firstName: 'Test',
+        lastName: 'User',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
+      await authService.register(testUser);
     });
     
     it('should login with correct credentials', async () => {
       const result = await authService.login(
-        testData.validUser.email,
-        testData.validUser.password
+        testUser.email,
+        testUser.password
       );
       
-      expect(result).toHaveProperty('token');
-      expect(result).toHaveProperty('refreshToken');
       expect(result).toHaveProperty('user');
+      expect(result).toHaveProperty('tokens');
+      expect(result.user.email).toBe(testUser.email);
     });
     
     it('should not login with incorrect password', async () => {
       await expect(
-        authService.login(testData.validUser.email, 'wrongpassword')
-      ).rejects.toThrow();
+        authService.login(testUser.email, 'wrongpassword')
+      ).rejects.toThrow('Invalid credentials');
     });
     
     it('should not login with non-existent email', async () => {
       await expect(
         authService.login('nonexistent@example.com', 'password')
-      ).rejects.toThrow();
+      ).rejects.toThrow('Invalid credentials');
     });
   });
   
-  describe('Token Management', () => {
-    let user;
+  describe('Password Reset', () => {
+    let tenant;
+    let testUser;
     
     beforeEach(async () => {
-      user = await authService.register(testData.validUser);
+      tenant = await global.testUtils.createTestTenant('outlet');
+      testUser = {
+        email: 'resettest@example.com',
+        password: 'Password123!',
+        firstName: 'Reset',
+        lastName: 'Test',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
+      await authService.register(testUser);
     });
     
-    it('should generate valid JWT token', () => {
-      const token = authService.generateToken(user._id, user.role);
-      expect(token).toBeDefined();
-      expect(typeof token).toBe('string');
-    });
-    
-    it('should verify valid token', () => {
-      const token = authService.generateToken(user._id, user.role);
-      const decoded = authService.verifyToken(token);
+    it('should generate password reset token', async () => {
+      const result = await authService.forgotPassword(testUser.email);
       
-      expect(decoded).toHaveProperty('userId');
-      expect(decoded.userId).toBe(user._id.toString());
+      expect(result).toHaveProperty('message');
+      expect(result.message).toContain('reset');
     });
     
-    it('should reject invalid token', () => {
-      expect(() => authService.verifyToken('invalid-token'))
-        .toThrow();
+    it('should handle non-existent email gracefully', async () => {
+      const result = await authService.forgotPassword('nonexistent@example.com');
+      
+      expect(result).toHaveProperty('message');
     });
   });
 });

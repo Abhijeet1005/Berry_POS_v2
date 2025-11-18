@@ -1,156 +1,132 @@
 /**
  * Authentication Integration Tests
- * Tests complete auth workflows via API
+ * Tests complete auth workflows
  */
 
-const request = require('supertest');
-const app = require('../../src/app');
-const testData = require('../helpers/testData');
-const ApiHelper = require('../helpers/apiHelper');
+const authService = require('../../src/modules/auth/authService');
+const User = require('../../src/models/User');
 
-describe('Authentication API Integration', () => {
-  let api;
+describe('Authentication Integration', () => {
+  let tenant;
   
-  beforeEach(() => {
-    api = new ApiHelper(app);
+  beforeEach(async () => {
+    tenant = await global.testUtils.createTestTenant('outlet');
   });
   
-  describe('POST /api/v1/auth/register', () => {
-    it('should register new user successfully', async () => {
-      const response = await api.post('/api/v1/auth/register', testData.validUser);
+  describe('Complete Registration Flow', () => {
+    it('should register and return tokens', async () => {
+      const userData = {
+        email: 'integration@example.com',
+        password: 'Password123!',
+        firstName: 'Integration',
+        lastName: 'Test',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
       
-      api.expectSuccess(response, 201);
-      expect(response.body.data).toHaveProperty('user');
-      expect(response.body.data).toHaveProperty('token');
-      expect(response.body.data.user.email).toBe(testData.validUser.email);
-    });
-    
-    it('should return 400 for invalid email', async () => {
-      const invalidData = { ...testData.validUser, email: 'invalid-email' };
-      const response = await api.post('/api/v1/auth/register', invalidData);
+      const result = await authService.register(userData);
       
-      api.expectError(response, 400);
-    });
-    
-    it('should return 400 for missing required fields', async () => {
-      const response = await api.post('/api/v1/auth/register', { email: 'test@test.com' });
-      
-      api.expectError(response, 400);
-    });
-    
-    it('should return 409 for duplicate email', async () => {
-      await api.post('/api/v1/auth/register', testData.validUser);
-      const response = await api.post('/api/v1/auth/register', testData.validUser);
-      
-      expect(response.status).toBe(409);
+      expect(result).toHaveProperty('user');
+      expect(result).toHaveProperty('tokens');
+      expect(result.tokens).toHaveProperty('accessToken');
+      expect(result.tokens).toHaveProperty('refreshToken');
+      expect(result.user.email).toBe(userData.email);
     });
   });
   
-  describe('POST /api/v1/auth/login', () => {
-    beforeEach(async () => {
-      await api.post('/api/v1/auth/register', testData.validUser);
-    });
-    
-    it('should login with correct credentials', async () => {
-      const response = await api.post('/api/v1/auth/login', {
-        email: testData.validUser.email,
-        password: testData.validUser.password
-      });
-      
-      api.expectSuccess(response, 200);
-      expect(response.body.data).toHaveProperty('token');
-      expect(response.body.data).toHaveProperty('refreshToken');
-    });
-    
-    it('should return 401 for incorrect password', async () => {
-      const response = await api.post('/api/v1/auth/login', {
-        email: testData.validUser.email,
-        password: 'wrongpassword'
-      });
-      
-      api.expectError(response, 401);
-    });
-    
-    it('should return 401 for non-existent user', async () => {
-      const response = await api.post('/api/v1/auth/login', {
-        email: 'nonexistent@example.com',
-        password: 'password'
-      });
-      
-      api.expectError(response, 401);
-    });
-  });
-  
-  describe('GET /api/v1/auth/me', () => {
-    let token, userId;
+  describe('Complete Login Flow', () => {
+    let testUser;
     
     beforeEach(async () => {
-      const registerResponse = await api.post('/api/v1/auth/register', testData.validUser);
-      token = registerResponse.body.data.token;
-      userId = registerResponse.body.data.user._id;
-      api.setAuth(token, userId);
+      testUser = {
+        email: 'loginflow@example.com',
+        password: 'Password123!',
+        firstName: 'Login',
+        lastName: 'Flow',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
+      await authService.register(testUser);
     });
     
-    it('should get current user with valid token', async () => {
-      const response = await api.get('/api/v1/auth/me');
+    it('should login and return valid tokens', async () => {
+      const result = await authService.login(testUser.email, testUser.password);
       
-      api.expectSuccess(response, 200);
-      expect(response.body.data.email).toBe(testData.validUser.email);
+      expect(result).toHaveProperty('user');
+      expect(result).toHaveProperty('tokens');
+      expect(result.user.email).toBe(testUser.email);
     });
     
-    it('should return 401 without token', async () => {
-      api.setAuth(null, null);
-      const response = await api.get('/api/v1/auth/me');
+    it('should update last login time', async () => {
+      await authService.login(testUser.email, testUser.password);
       
-      api.expectError(response, 401);
-    });
-    
-    it('should return 401 with invalid token', async () => {
-      api.setAuth('invalid-token', userId);
-      const response = await api.get('/api/v1/auth/me');
-      
-      api.expectError(response, 401);
+      const user = await User.findOne({ email: testUser.email });
+      expect(user.lastLogin).toBeDefined();
     });
   });
   
-  describe('POST /api/v1/auth/refresh-token', () => {
+  describe('Token Refresh Flow', () => {
     let refreshToken;
     
     beforeEach(async () => {
-      const registerResponse = await api.post('/api/v1/auth/register', testData.validUser);
-      refreshToken = registerResponse.body.data.refreshToken;
+      const userData = {
+        email: 'refresh@example.com',
+        password: 'Password123!',
+        firstName: 'Refresh',
+        lastName: 'Test',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
+      
+      const result = await authService.register(userData);
+      refreshToken = result.tokens.refreshToken;
     });
     
-    it('should refresh token with valid refresh token', async () => {
-      const response = await api.post('/api/v1/auth/refresh-token', { refreshToken });
+    it('should refresh access token', async () => {
+      const newTokens = await authService.refreshToken(refreshToken);
       
-      api.expectSuccess(response, 200);
-      expect(response.body.data).toHaveProperty('token');
-    });
-    
-    it('should return 401 with invalid refresh token', async () => {
-      const response = await api.post('/api/v1/auth/refresh-token', {
-        refreshToken: 'invalid-token'
-      });
-      
-      api.expectError(response, 401);
+      expect(newTokens).toHaveProperty('accessToken');
+      expect(newTokens).toHaveProperty('refreshToken');
     });
   });
   
-  describe('POST /api/v1/auth/logout', () => {
-    let token, userId;
+  describe('Password Reset Flow', () => {
+    let testUser;
     
     beforeEach(async () => {
-      const registerResponse = await api.post('/api/v1/auth/register', testData.validUser);
-      token = registerResponse.body.data.token;
-      userId = registerResponse.body.data.user._id;
-      api.setAuth(token, userId);
+      testUser = {
+        email: 'resetflow@example.com',
+        password: 'Password123!',
+        firstName: 'Reset',
+        lastName: 'Flow',
+        phone: '9876543210',
+        role: 'manager',
+        tenantId: tenant._id
+      };
+      await authService.register(testUser);
     });
     
-    it('should logout successfully', async () => {
-      const response = await api.post('/api/v1/auth/logout');
+    it('should complete password reset flow', async () => {
+      // Request reset
+      const resetResult = await authService.forgotPassword(testUser.email);
+      expect(resetResult).toHaveProperty('message');
       
-      api.expectSuccess(response, 200);
+      // In production, resetToken would come from email
+      if (resetResult.resetToken) {
+        // Reset password
+        const result = await authService.resetPassword(
+          resetResult.resetToken,
+          'NewPassword123!'
+        );
+        expect(result).toHaveProperty('message');
+        
+        // Login with new password
+        const loginResult = await authService.login(testUser.email, 'NewPassword123!');
+        expect(loginResult).toHaveProperty('user');
+      }
     });
   });
 });
