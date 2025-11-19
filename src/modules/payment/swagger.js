@@ -75,6 +75,88 @@
 
 /**
  * @swagger
+ * /api/v1/payments/order/{orderId}:
+ *   get:
+ *     summary: Get payments by order ID
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: orderId
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Order ID
+ *     responses:
+ *       200:
+ *         description: Payments retrieved successfully
+ *       404:
+ *         description: Order not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/payments/{id}:
+ *   get:
+ *     summary: Get payment by ID
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Payment retrieved successfully
+ *       404:
+ *         description: Payment not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/payments/{id}/refund:
+ *   post:
+ *     summary: Process refund
+ *     tags: [Payments]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - amount
+ *               - reason
+ *             properties:
+ *               amount:
+ *                 type: number
+ *                 description: Refund amount
+ *               reason:
+ *                 type: string
+ *                 description: Reason for refund
+ *     responses:
+ *       200:
+ *         description: Refund processed successfully
+ *       400:
+ *         description: Invalid refund amount
+ *       404:
+ *         description: Payment not found
+ */
+
+/**
+ * @swagger
  * /api/v1/payments/{id}/receipt:
  *   get:
  *     summary: Get payment receipt
@@ -142,6 +224,26 @@
  *     responses:
  *       200:
  *         description: Payment verified
+ */
+
+/**
+ * @swagger
+ * /api/v1/payments/razorpay/webhook:
+ *   post:
+ *     summary: Handle Razorpay webhook
+ *     description: Webhook endpoint for Razorpay payment notifications (no authentication required, verified by signature)
+ *     tags: [Payments]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Webhook processed successfully
+ *       400:
+ *         description: Invalid signature
  */
 
 module.exports = {};

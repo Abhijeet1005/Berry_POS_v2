@@ -52,6 +52,135 @@
 
 /**
  * @swagger
+ * /api/v1/tables/{id}:
+ *   get:
+ *     summary: Get table by ID
+ *     tags: [Tables]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Table details
+ *       404:
+ *         description: Table not found
+ *
+ *   put:
+ *     summary: Update table
+ *     tags: [Tables]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               tableNumber:
+ *                 type: string
+ *               capacity:
+ *                 type: number
+ *               section:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Table updated successfully
+ *       404:
+ *         description: Table not found
+ *
+ *   delete:
+ *     summary: Delete table
+ *     tags: [Tables]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Table deleted successfully
+ *       404:
+ *         description: Table not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/tables/transfer:
+ *   post:
+ *     summary: Transfer order between tables
+ *     tags: [Tables]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - orderId
+ *               - fromTableId
+ *               - toTableId
+ *             properties:
+ *               orderId:
+ *                 type: string
+ *               fromTableId:
+ *                 type: string
+ *               toTableId:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Order transferred successfully
+ *       404:
+ *         description: Table or order not found
+ */
+
+/**
+ * @swagger
+ * /api/v1/tables/merge:
+ *   post:
+ *     summary: Merge multiple tables
+ *     tags: [Tables]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - tableIds
+ *             properties:
+ *               tableIds:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Array of table IDs to merge
+ *     responses:
+ *       200:
+ *         description: Tables merged successfully
+ *       400:
+ *         description: Invalid table IDs
+ */
+
+/**
+ * @swagger
  * /api/v1/tables/{id}/qr:
  *   get:
  *     summary: Get table QR code
@@ -67,6 +196,21 @@
  *     responses:
  *       200:
  *         description: QR code image
+ *
+ *   post:
+ *     summary: Regenerate table QR code
+ *     tags: [Tables]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: QR code regenerated successfully
  */
 
 /**

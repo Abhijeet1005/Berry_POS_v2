@@ -31,6 +31,10 @@ const cancelOrderItemSchema = Joi.object({
   reason: Joi.string().required()
 });
 
+const cancelOrderSchema = Joi.object({
+  reason: Joi.string().min(3).max(200).required()
+});
+
 const updateKOTStatusSchema = Joi.object({
   status: Joi.string().valid(...Object.values(KOT_STATUS)).required()
 });
@@ -40,5 +44,6 @@ module.exports = {
   updateOrderSchema,
   updateOrderStatusSchema,
   cancelOrderItemSchema,
+  cancelOrderSchema,
   updateKOTStatusSchema
 };

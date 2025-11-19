@@ -70,6 +70,144 @@
  *     responses:
  *       200:
  *         description: Tenant details
+ *
+ *   put:
+ *     summary: Update tenant
+ *     tags: [Tenants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               contactInfo:
+ *                 type: object
+ *     responses:
+ *       200:
+ *         description: Tenant updated successfully
+ *
+ *   delete:
+ *     summary: Delete tenant (soft delete)
+ *     tags: [Tenants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tenant deleted successfully
+ */
+
+/**
+ * @swagger
+ * /api/v1/tenants/{id}/hierarchy:
+ *   get:
+ *     summary: Get tenant hierarchy
+ *     tags: [Tenants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Tenant hierarchy
+ */
+
+/**
+ * @swagger
+ * /api/v1/tenants/{id}/outlets:
+ *   post:
+ *     summary: Create outlet under a brand
+ *     tags: [Tenants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - name
+ *               - contactInfo
+ *             properties:
+ *               name:
+ *                 type: string
+ *               contactInfo:
+ *                 type: object
+ *     responses:
+ *       201:
+ *         description: Outlet created successfully
+ */
+
+/**
+ * @swagger
+ * /api/v1/tenants/{id}/subscription:
+ *   get:
+ *     summary: Get subscription details
+ *     tags: [Tenants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       200:
+ *         description: Subscription details
+ *
+ *   put:
+ *     summary: Update subscription
+ *     tags: [Tenants]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               plan:
+ *                 type: string
+ *               billingCycle:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Subscription updated successfully
  */
 
 module.exports = {};

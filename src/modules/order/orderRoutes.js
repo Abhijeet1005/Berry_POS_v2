@@ -10,6 +10,7 @@ const {
   updateOrderSchema,
   updateOrderStatusSchema,
   cancelOrderItemSchema,
+  cancelOrderSchema,
   updateKOTStatusSchema
 } = require('./orderValidation');
 
@@ -102,6 +103,19 @@ router.patch(
   requirePermission('orders.update'),
   validate(updateOrderStatusSchema),
   orderController.updateOrderStatus
+);
+
+/**
+ * @route   POST /api/v1/orders/:id/cancel
+ * @desc    Cancel order and restore inventory
+ * @access  Private
+ */
+router.post(
+  '/orders/:id/cancel',
+  validateObjectId('id'),
+  requirePermission('orders.update'),
+  validate(cancelOrderSchema),
+  orderController.cancelOrder
 );
 
 /**

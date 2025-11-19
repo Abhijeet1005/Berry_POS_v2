@@ -78,6 +78,21 @@ const cancelOrderItem = asyncHandler(async (req, res) => {
 });
 
 /**
+ * Cancel order and restore inventory
+ * POST /api/v1/orders/:id/cancel
+ */
+const cancelOrder = asyncHandler(async (req, res) => {
+  const { reason } = req.body;
+  const order = await orderService.cancelOrder(
+    req.params.id,
+    reason,
+    req.tenantId
+  );
+  
+  res.json(successResponse(order, 'Order cancelled successfully'));
+});
+
+/**
  * Generate KOT for order
  * POST /api/v1/orders/:id/kot
  */
@@ -148,6 +163,7 @@ module.exports = {
   updateOrder,
   updateOrderStatus,
   cancelOrderItem,
+  cancelOrder,
   generateKOT,
   getOrdersByTable,
   getOrdersByCustomer,

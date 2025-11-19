@@ -44,4 +44,33 @@
  *         description: Audit statistics
  */
 
+/**
+ * @swagger
+ * /api/v1/audit/export:
+ *   get:
+ *     summary: Export audit logs
+ *     tags: [Audit]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: query
+ *         name: format
+ *         schema:
+ *           type: string
+ *           enum: [csv, excel, pdf]
+ *       - in: query
+ *         name: startDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *       - in: query
+ *         name: endDate
+ *         schema:
+ *           type: string
+ *           format: date
+ *     responses:
+ *       200:
+ *         description: Audit logs exported
+ */
+
 module.exports = {};
