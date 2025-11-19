@@ -121,6 +121,45 @@ recipeSchema.methods.deductInventory = async function(dishQuantity = 1) {
   return true;
 };
 
+// Restore inventory for recipe (on order cancellation)
+recipeSchema.methods.restoreInventory = async function(dishQuantity = 1) {
+  const InventoryItem = mongoose.model('InventoryItem');
+  const StockMovement = mongoose.model('StockMovement');
+  
+  for (const ingredient of this.ingredients) {
+    const item = await InventoryItem.findById(ingredient.inventoryItemId);
+    
+    if (!item) {
+      throw new Error(`Inventory item ${ingredient.inventoryItemId} not found`);
+    }
+    
+    const restoreQuantity = ingredient.quantity * dishQuantity;
+    const previousStock = item.currentStock;
+    
+    // Add stock back
+    await item.updateStock(restoreQuantity, 'increment');
+    
+    // Create stock movement record for restoration
+    await StockMovement.create({
+      tenantId: this.tenantId,
+      outletId: this.outletId,
+      inventoryItemId: item._id,
+      type: 'adjustment',
+      quantity: restoreQuantity,
+      unit: ingredient.unit,
+      previousStock,
+      newStock: item.currentStock,
+      unitCost: item.unitCost,
+      referenceType: 'Recipe',
+      referenceId: this._id,
+      notes: 'Restored due to order cancellation',
+      timestamp: new Date()
+    });
+  }
+  
+  return true;
+};
+
 // Check if all ingredients are available
 recipeSchema.methods.checkAvailability = async function(dishQuantity = 1) {
   const InventoryItem = mongoose.model('InventoryItem');

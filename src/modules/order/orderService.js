@@ -360,12 +360,98 @@ const getOrdersByCustomer = async (customerId, tenantId, limit = 10) => {
   return orders;
 };
 
+/**
+ * Cancel entire order with inventory restoration
+ */
+const cancelOrder = async (orderId, reason, tenantId) => {
+  const order = await Order.findOne({ _id: orderId, tenantId });
+  
+  if (!order) {
+    throw new NotFoundError('Order');
+  }
+  
+  // Prevent cancelling already completed orders
+  if (order.status === ORDER_STATUS.COMPLETED) {
+    throw new ValidationError('Cannot cancel completed orders');
+  }
+  
+  // Prevent cancelling already cancelled orders
+  if (order.status === ORDER_STATUS.CANCELLED) {
+    throw new ValidationError('Order is already cancelled');
+  }
+  
+  // Store previous status for inventory restoration logic
+  const previousStatus = order.status;
+  
+  // Restore inventory ONLY if order was in 'pending' or 'confirmed' status
+  // (i.e., food hasn't been prepared yet)
+  const shouldRestoreInventory = ['pending', 'confirmed'].includes(previousStatus);
+  
+  if (shouldRestoreInventory) {
+    try {
+      // Restore inventory for each item
+      for (const item of order.items) {
+        // Check if dish has a recipe
+        const recipe = await Recipe.findOne({
+          tenantId,
+          outletId: order.outletId,
+          dishId: item.dishId,
+          isActive: true
+        });
+        
+        if (recipe) {
+          // Restore inventory using recipe (add back ingredients)
+          await recipe.restoreInventory(item.quantity);
+        } else {
+          // Restore dish stock (for items without recipes)
+          const dish = await Dish.findById(item.dishId);
+          if (dish && dish.stock !== undefined) {
+            await dish.incrementStock(item.quantity);
+          }
+        }
+      }
+    } catch (error) {
+      // Log error but continue with cancellation
+      console.error('Failed to restore inventory on cancellation:', error);
+      // In production, create notification for manager to manually adjust
+    }
+  }
+  
+  // Update order status
+  order.status = ORDER_STATUS.CANCELLED;
+  order.cancellationReason = reason;
+  order.cancelledAt = new Date();
+  
+  await order.save();
+  
+  // Free up table if applicable
+  if (order.tableId) {
+    await Table.findByIdAndUpdate(order.tableId, {
+      status: TABLE_STATUS.AVAILABLE,
+      currentOrderId: null
+    });
+  }
+  
+  // Sync cancellation to platform if order is from Swiggy/Zomato
+  try {
+    if (order.source === 'swiggy' || order.source === 'zomato') {
+      const syncService = getOrderSyncService();
+      await syncService.cancelOrder(order._id, reason);
+    }
+  } catch (error) {
+    console.error('Error syncing cancellation to platform:', error);
+  }
+  
+  return order;
+};
+
 module.exports = {
   createOrder,
   getOrders,
   getOrderById,
   updateOrder,
   updateOrderStatus,
+  cancelOrder,
   cancelOrderItem,
   getOrdersByTable,
   getOrdersByCustomer
